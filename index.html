@@ -104,9 +104,10 @@
     </div>
     <div id="floating-tooltip" class="floating-tooltip"></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="/config.js"></script>
     <script>
         // Initialize Supabase client
-        window.supabaseClient = window.supabase.createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+        window.supabaseClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
     </script>
     <script src="style.js"></script>
 </body>
