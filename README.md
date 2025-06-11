@@ -1,4 +1,4 @@
-## Credit Tracker Application
+## CredTracker Application
 
 This is a modern, interactive web application designed to help users efficiently track their academic credits, categorize them, and monitor their progress towards program completion. Built with a focus on user experience and data persistence, this tool provides a clear overview of earned and remaining credits, ensuring users stay on track with their academic goals.
 
