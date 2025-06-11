@@ -1,0 +1,729 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 16px;
+    padding: 24px;
+    width: 360px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    margin-bottom: 32px;
+}
+
+.card-type {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    margin-bottom: 8px;
+}
+
+.card-number {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.card-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    font-size: 12px;
+    color: #a0a0a0;
+}
+
+.value {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.card-logo {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.credits-heading {
+    text-align: center;
+    color: #e60000;
+    text-decoration: underline;
+    margin-bottom: 32px;
+    margin-top: 16px;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.credits-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+    background: #fff;
+}
+
+.credits-table th, .credits-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.credits-table th {
+    background: #b3dfff;
+    color: #222;
+    font-weight: 600;
+}
+
+.credits-table td {
+    color: #222;
+    font-weight: 400;
+}
+
+.view-btn {
+    background: #2176bd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.view-btn:hover {
+    background: #155a8a;
+}
+
+.details-container {
+    background: #ededed;
+    padding: 20px 0 30px 0;
+    border-radius: 4px;
+    margin: 0;
+    width: 100%;
+}
+
+.details-heading {
+    text-align: center;
+    color: #e60000;
+    text-decoration: underline;
+    margin-bottom: 24px;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin: 0;
+}
+
+.details-table th, .details-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.details-table th {
+    background: #fff;
+    color: #222;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.details-table td {
+    color: #222;
+    font-weight: 400;
+}
+
+.editable-input {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #b3d7f7;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #f9f9f9;
+}
+
+.add-row-btn, .delete-row-btn, .save-btn {
+    background: #2176bd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 8px 4px;
+    transition: background 0.2s;
+}
+
+.add-row-btn:hover, .delete-row-btn:hover, .save-btn:hover {
+    background: #155a8a;
+}
+
+.delete-row-btn {
+    background: #e74c3c;
+}
+
+.delete-row-btn:hover {
+    background: #c0392b;
+}
+
+.save-btn {
+    display: block;
+    margin: 32px auto 0 auto;
+    min-width: 120px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Ensure table cells don't overflow */
+.credits-table td, .details-table td {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+}
+
+.auth-form {
+    background: #fff;
+    padding: 36px 32px 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 320px;
+    gap: 18px;
+}
+
+.auth-title {
+    color: #e60000;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-decoration: underline;
+}
+
+.auth-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b3d7f7;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f9f9f9;
+    margin-bottom: 4px;
+}
+
+.auth-btn-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+}
+
+.auth-btn {
+    background: #2176bd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-btn:hover {
+    background: #155a8a;
+}
+
+.auth-message {
+    color: #e60000;
+    font-size: 1rem;
+    min-height: 20px;
+    text-align: center;
+}
+
+.logout-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}
+
+.logout-btn {
+    background: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.logout-btn:hover {
+    background: #c0392b;
+}
+
+.forgot-password-link {
+    color: #2176bd;
+    text-align: right;
+    display: block;
+    margin-top: -10px;
+    margin-bottom: 8px;
+    font-size: 0.98rem;
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.forgot-password-link:hover {
+    color: #155a8a;
+}
+
+.profile-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 18px 20px 16px 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    max-width: 400px;
+}
+
+.profile-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #2176bd;
+}
+
+.profile-info {
+    margin-bottom: 10px;
+    color: #444;
+    font-size: 1rem;
+}
+
+.profile-btn {
+    background: #2176bd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: background 0.2s;
+}
+
+.profile-btn:hover {
+    background: #155a8a;
+}
+
+.change-password-form {
+    margin-top: 10px;
+}
+
+/* Styles for the table cell containing the total */
+.total-credits-cell {
+    font-weight: bold;
+    font-size: 1.3em;
+    text-align: center;
+    position: relative;
+    color: #222;
+}
+
+.total-credits-cell.mismatch {
+    color: #e74c3c;
+}
+
+/* Styles for the 'i' info icon */
+.info-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: #fff;
+    color: #e74c3c;
+    border: 1.5px solid #e74c3c;
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+    line-height: 20px;
+    cursor: pointer;
+    position: relative;
+    vertical-align: middle;
+    transition: background 0.2s, color 0.2s;
+    outline: none;
+    z-index: 2;
+}
+
+.info-icon:hover,
+.info-icon:focus {
+    background: #e74c3c;
+    color: #fff;
+}
+
+/* Styles for the floating tooltip itself */
+.floating-tooltip {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    background: #e74c3c;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 1em;
+    z-index: 99999;
+    box-shadow: none !important;
+    border: none !important;
+    outline: none !important;
+    white-space: normal;
+    max-width: 280px;
+    text-align: center;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    &::before, &::after {
+        content: none !important;
+    }
+}
+
+.floating-tooltip.visible {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+
+.global-tooltip {
+    display: none;
+    position: fixed;
+    background: #e74c3c;
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 1em;
+    z-index: 99999;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    white-space: pre-line;
+    max-width: 90vw;
+    text-align: center;
+    pointer-events: none;
+}
+
+.onboarding-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+}
+
+.onboarding-step {
+    background: #fff;
+    padding: 36px 32px 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 320px;
+    gap: 18px;
+}
+
+.onboarding-title {
+    color: #2176bd;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: #e0f2ff;
+    border-bottom: 1px solid #b3dfff;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+.header-branding {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #e60000;
+    text-decoration: underline;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.header-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.header-icon-btn svg {
+    width: 28px;
+    height: 28px;
+    color: #2176bd;
+}
+
+.header-icon-btn:hover {
+    background: rgba(33, 118, 189, 0.1);
+}
+
+.header-icon-btn[style*="pointer-events: none"] {
+    cursor: not-allowed;
+}
+
+.header-icon-btn[style*="opacity: 0.5"] {
+    background: none;
+}
+
+/* Add specific hover effect for home button */
+#home-btn:hover svg {
+    transform: scale(1.1);
+}
+
+.profile-popover {
+    position: absolute;
+    top: 60px; /* Adjust based on header height */
+    right: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    padding: 20px;
+    width: 280px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.profile-popover .profile-title {
+    margin-top: 0;
+    font-size: 1.3rem;
+    color: #2176bd;
+    text-decoration: none;
+}
+
+.profile-popover .profile-info p {
+    margin: 4px 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.profile-popover .profile-btn {
+    align-self: flex-start;
+    margin-top: 10px;
+    padding: 8px 15px;
+}
+
+.edit-profile-view {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    max-width: 500px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.edit-profile-title {
+    color: #2176bd;
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.edit-profile-view label {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: -10px; /* Adjust spacing */
+}
+
+.edit-profile-view .auth-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #b3d7f7;
+    border-radius: 6px;
+    font-size: 1rem;
+    background: #f9f9f9;
+}
+
+.profile-password-section {
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.profile-password-section .profile-title {
+    color: #e60000;
+    text-decoration: underline;
+    text-align: center;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.profile-password-section .auth-btn-row {
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+
+    .auth-container, .onboarding-container, .app-container {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
+        font-size: 1.8em;
+    }
+
+    .auth-input, .onboarding-name, .onboarding-credits {
+        padding: 10px;
+        font-size: 1em;
+    }
+
+    .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
+        padding: 10px 15px;
+        font-size: 1em;
+    }
+
+    .credits-table-container, .details-container {
+        overflow-x: auto;
+    }
+
+    .credits-table, .details-table {
+        width: 100%;
+        min-width: 600px; /* Ensure table doesn't shrink too much */
+    }
+
+    .credits-table th, .credits-table td, .details-table th, .details-table td {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    .add-row-btn, .delete-row-btn {
+        padding: 6px 10px;
+        font-size: 0.85em;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
+        font-size: 1.5em;
+    }
+
+    .auth-btn-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
+        width: 100%;
+    }
+
+    .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .profile-popover {
+        right: 5px;
+        width: calc(100% - 10px);
+        font-size: 0.9em;
+    }
+
+    .edit-profile-view {
+        padding: 15px;
+    }
+
+    .credits-table, .details-table {
+        min-width: 450px; /* Further reduce min-width for very small screens */
+    }
+
+    .credits-table th, .credits-table td, .details-table th, .details-table td {
+        padding: 6px 8px;
+        font-size: 0.8em;
+    }
+} 

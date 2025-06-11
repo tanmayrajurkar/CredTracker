@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="auth-container" class="auth-container">
+      <form id="auth-form" class="auth-form" onsubmit="return false;">
+        <h2 class="auth-title">Login or Signup</h2>
+        <input type="email" id="email" placeholder="Email" class="auth-input" required />
+        <input type="password" id="password" placeholder="Password" class="auth-input" required />
+        <div class="auth-btn-row">
+          <button id="login-btn" class="auth-btn" type="button">Login</button>
+          <button id="signup-btn" class="auth-btn" type="button">Sign Up</button>
+        </div>
+        <a href="#" id="forgot-password-link" class="forgot-password-link">Forgot Password?</a>
+        <div id="auth-message" class="auth-message"></div>
+      </form>
+      <form id="reset-form" class="auth-form" style="display:none;" onsubmit="return false;">
+        <h2 class="auth-title">Reset Password</h2>
+        <input type="email" id="reset-email" placeholder="Email" class="auth-input" required />
+        <div class="auth-btn-row">
+          <button id="reset-btn" class="auth-btn" type="button">Send Reset Link</button>
+          <button id="back-to-login-btn" class="auth-btn" type="button">Back</button>
+        </div>
+        <div id="reset-message" class="auth-message"></div>
+      </form>
+    </div>
+
+    <div id="onboarding-container" class="onboarding-container" style="display:none;">
+      <div id="onboarding-step-1" class="onboarding-step">
+        <h2 class="onboarding-title">Welcome! What's your name?</h2>
+        <input type="text" id="onboarding-name" placeholder="Your Name" class="auth-input" required />
+        <button id="onboarding-next-1" class="auth-btn">Next</button>
+      </div>
+
+      <div id="onboarding-step-2" class="onboarding-step" style="display:none;">
+        <h2 class="onboarding-title">How many credits to complete your program?</h2>
+        <input type="number" id="onboarding-credits" placeholder="e.g., 200" class="auth-input" min="0" required />
+        <button id="onboarding-next-2" class="auth-btn">Next</button>
+      </div>
+
+      <div id="onboarding-step-3" class="onboarding-step" style="display:none;">
+        <h2 class="onboarding-title">Confirm Your Details</h2>
+        <p>Name: <span id="confirm-name"></span></p>
+        <p>Credits to Complete: <span id="confirm-credits"></span></p>
+        <button id="onboarding-confirm-btn" class="auth-btn">Confirm & Start Tracking!</button>
+      </div>
+    </div>
+
+    <div id="app-container" style="display:none;">
+      <div class="header-row">
+        <div class="header-branding">CREDITS TRACKER</div>
+        <div class="header-actions">
+          <button id="home-btn" class="header-icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-home"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+          <button id="profile-icon-btn" class="header-icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-circle-2"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/></svg></button>
+          <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
+      </div>
+
+      <div id="profile-popover" class="profile-popover" style="display:none;">
+        <h3 class="profile-title">Your Profile</h3>
+        <div class="profile-info">
+          <p>Name: <span id="profile-name"></span></p>
+          <p>Email: <span id="profile-email"></span></p>
+          <p>Credits to Complete: <span id="profile-display-credits"></span></p>
+        </div>
+        <button id="edit-profile-page-btn" class="profile-btn">Edit Profile</button>
+      </div>
+
+      <div id="main-content-view">
+        <h2 class="credits-heading">CREDITS TRACKER</h2>
+        <div id="main-table-container"></div>
+        <button id="save-btn" class="save-btn">Save</button>
+      </div>
+
+      <div id="edit-profile-view" class="edit-profile-view" style="display:none;">
+        <h2 class="edit-profile-title">Edit Your Profile</h2>
+        <label for="edit-profile-name">Name:</label>
+        <input type="text" id="edit-profile-name" class="auth-input" />
+
+        <label for="edit-profile-total-credits">Total Credits to Complete:</label>
+        <input type="number" id="edit-profile-total-credits" class="auth-input" min="0" />
+        
+        <div class="auth-btn-row">
+          <button id="save-edited-profile-btn" class="auth-btn">Save Changes</button>
+          <button id="cancel-edit-profile-btn" class="auth-btn">Cancel</button>
+        </div>
+        <div id="edit-profile-message" class="auth-message"></div>
+
+        <div class="profile-password-section">
+          <h3 class="profile-title">Change Password</h3>
+          <input type="password" id="new-password" class="auth-input" placeholder="New Password" />
+          <div class="auth-btn-row">
+            <button id="change-password-btn" class="auth-btn">Update Password</button>
+          </div>
+          <div id="change-password-message" class="auth-message"></div>
+        </div>
+      </div>
+    </div>
+    <div id="floating-tooltip" class="floating-tooltip"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
+    <script src="/env.js"></script>
+    <script>
+        // Initialize Supabase client
+        window.supabaseClient = window.supabase.createClient(window.env.SUPABASE_URL, window.env.SUPABASE_KEY);
+    </script>
+    <script src="style.js"></script>
+</body>
+</html> 
