@@ -93,26 +93,22 @@ function showTooltip() {
     dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
   }
 
+  console.log('Dynamic Tooltip Message:', dynamicTooltipMessage);
   floatingTooltip.textContent = dynamicTooltipMessage;
+  console.log('Floating Tooltip Text Content after assignment:', floatingTooltip.textContent);
 
-  // 1. Make it block and invisible to get dimensions
-  floatingTooltip.style.display = 'block';
-  floatingTooltip.style.visibility = 'hidden';
-
-  // 2. Get dimensions
+  // Get dimensions and position it
   const rect = infoIcon.getBoundingClientRect();
   const scrollY = window.scrollY || window.pageYOffset;
   const scrollX = window.scrollX || window.pageXOffset;
   const tooltipWidth = floatingTooltip.offsetWidth;
   const tooltipHeight = floatingTooltip.offsetHeight;
 
-  // 3. Position it
   floatingTooltip.style.left = (rect.left + rect.width / 2 + scrollX - tooltipWidth / 2) + 'px';
   floatingTooltip.style.top = (rect.top + scrollY - tooltipHeight - 12) + 'px';
 
-  // 4. Finally, make it visible with the transition
+  // Make it visible with the transition
   floatingTooltip.classList.add('visible');
-  floatingTooltip.style.visibility = 'visible';
 }
 
 function hideTooltip() {
