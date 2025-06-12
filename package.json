@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "serve public",
-    "build": "echo 'Build completed'",
+    "build": "node build.js",
     "dev": "serve public"
   },
   "dependencies": {
