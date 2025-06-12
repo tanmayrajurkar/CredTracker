@@ -12,12 +12,17 @@ body {
     align-items: center;
     justify-content: center;
     padding: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .container {
     padding: 20px;
     width: 100%;
     max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .card {
@@ -28,6 +33,7 @@ body {
     max-width: 360px;
     color: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .card-header {
@@ -85,8 +91,7 @@ body {
     text-align: center;
     color: #e60000;
     text-decoration: underline;
-    margin-bottom: 32px;
-    margin-top: 16px;
+    margin-bottom: 24px;
     font-size: 1.5rem;
     font-weight: 500;
 }
@@ -181,11 +186,13 @@ body {
 
 .editable-input {
     width: 100%;
+    max-width: 150px;
     padding: 6px 8px;
     border: 1px solid #b3d7f7;
     border-radius: 4px;
     font-size: 1rem;
     background: #f9f9f9;
+    box-sizing: border-box;
 }
 
 .add-row-btn, .delete-row-btn, .save-btn {
@@ -193,12 +200,14 @@ body {
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 8px 16px;
-    font-size: 1rem;
+    padding: 8px 12px;
+    font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
     margin: 8px 4px;
     transition: background 0.2s;
+    width: auto;
+    display: inline-block;
 }
 
 .add-row-btn:hover, .delete-row-btn:hover, .save-btn:hover {
@@ -216,7 +225,8 @@ body {
 .save-btn {
     display: block;
     margin: 32px auto 0 auto;
-    min-width: 120px;
+    width: 100%;
+    max-width: 200px;
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -229,24 +239,25 @@ body {
 }
 
 .auth-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
     width: 100%;
     padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 }
 
 .auth-form {
     background: #fff;
-    padding: 36px 32px 28px 32px;
+    padding: 30px 25px;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 90%;
+    width: 100%;
     max-width: 400px;
     gap: 18px;
 }
@@ -470,13 +481,14 @@ body {
 }
 
 .onboarding-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
     width: 100%;
     padding: 15px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
 }
 
 .onboarding-step {
@@ -501,14 +513,22 @@ body {
 }
 
 .header-row {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
+    padding: 10px 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
     background-color: #e0f2ff;
     border-bottom: 1px solid #b3dfff;
-    margin-bottom: 20px;
     border-radius: 8px;
+}
+
+.header-branding, .header-actions {
+    flex-basis: auto;
+    margin-bottom: 0;
 }
 
 .header-branding {
@@ -561,18 +581,17 @@ body {
 
 .profile-popover {
     position: absolute;
-    top: 60px;
-    right: 20px;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
     padding: 20px;
-    width: 90%;
-    max-width: 280px;
-    z-index: 100;
-    display: flex;
+    width: 280px;
+    right: 20px;
+    top: 60px;
+    display: none;
     flex-direction: column;
-    gap: 12px;
+    gap: 15px;
 }
 
 .profile-popover .profile-title {
@@ -668,14 +687,19 @@ body {
 }
 
 .credits-table, .details-table {
+    width: 100%;
     min-width: 600px;
+    border-collapse: collapse;
+    margin-bottom: 40px;
+    background: #fff;
 }
 
 .credits-table th, .credits-table td, .details-table th, .details-table td {
-    padding: 12px 15px;
+    padding: 12px 10px;
     border-bottom: 1px solid #eee;
     text-align: left;
     vertical-align: middle;
+    white-space: nowrap;
 }
 
 .credits-table th {
@@ -686,106 +710,118 @@ body {
 
 @media (max-width: 768px) {
     body {
-        padding: 0;
+        padding: 5px;
     }
 
-    .auth-container, .onboarding-container, .app-container {
-        padding: 15px;
-    }
-
-    .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.3rem;
-    }
-
-    .auth-input, .onboarding-name, .onboarding-credits {
-        font-size: 0.95rem;
-    }
-
-    .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
-        padding: 10px 20px;
-        font-size: 0.95rem;
-    }
-
-    .credits-table-container, .details-container {
-        overflow-x: auto; /* Enable horizontal scrolling for tables */
-    }
-
-    .credits-table, .details-table {
-        min-width: 600px; /* Ensure tables are wide enough for content */
-    }
-
-    .credits-table th, .credits-table td, .details-table th, .details-table td {
-        /* Revert to default table cell display and padding from global styles */
-        /* Removed text-align, display: block, and width: 100% */
-        padding: 8px 15px; /* Adjust padding for smaller screens */
-    }
-
-    .add-row-btn, .delete-row-btn {
-        padding: 6px 12px;
-        font-size: 0.9rem;
+    .container {
+        padding: 10px;
     }
 
     .header-row {
         flex-direction: column;
         align-items: center;
-        padding: 10px;
     }
 
     .header-actions {
         margin-top: 10px;
         justify-content: center;
+        width: 100%;
+    }
+
+    .credits-table, .details-table {
+        min-width: auto;
+    }
+
+    .credits-table th, .credits-table td, .details-table th, .details-table td {
+        font-size: 0.9rem;
+        padding: 8px;
+    }
+
+    .editable-input {
+        max-width: 120px;
+        font-size: 0.9rem;
+    }
+
+    .add-row-btn, .delete-row-btn, .save-btn {
+        font-size: 0.85rem;
+        padding: 6px 10px;
+        margin: 5px 2px;
+    }
+
+    .save-btn {
+        max-width: 180px;
     }
 
     .profile-popover {
         width: 90%;
-        right: 5%;
         left: 5%;
+        right: 5%;
+        top: auto;
+        bottom: 20px;
         transform: translateX(0);
     }
 
-    .edit-profile-view {
-        width: 90%;
-        padding: 20px;
+    .auth-container, .onboarding-container, .app-container {
+        padding: 10px;
+    }
+
+    .auth-form, .onboarding-step {
+        padding: 25px 20px;
     }
 }
 
 @media (max-width: 480px) {
-    .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.1rem;
+    .container {
+        padding: 5px;
     }
 
-    .auth-btn-row {
-        flex-direction: column;
+    .credits-heading, .details-heading, .auth-title, .onboarding-title, .edit-profile-title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
     }
 
-    .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
-        width: 100%;
-        margin: 5px 0;
+    .credits-table th, .credits-table td, .details-table th, .details-table td {
+        font-size: 0.8rem;
+        padding: 6px;
     }
 
-    .header-row {
-        flex-direction: column;
-        align-items: center;
-        padding: 8px;
+    .editable-input {
+        font-size: 0.8rem;
+        max-width: 80px;
+    }
+
+    .add-row-btn, .delete-row-btn, .save-btn {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        margin: 3px 1px;
+    }
+
+    .save-btn {
+        max-width: 150px;
+    }
+
+    .auth-form, .onboarding-step {
+        padding: 20px 15px;
+        gap: 15px;
+    }
+
+    .header-icon-btn {
+        padding: 5px;
     }
 
     .header-actions {
-        margin-top: 8px;
-        justify-content: center;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .logout-row {
+        flex-direction: column;
     }
 
     .profile-popover {
         width: 95%;
-        right: 2.5%;
         left: 2.5%;
-    }
-
-    .credits-table th, .credits-table td, .details-table th, .details-table td {
-        padding: 6px 10px;
-    }
-
-    .add-row-btn, .delete-row-btn {
-        padding: 5px 10px;
-        font-size: 0.85rem;
+        right: 2.5%;
+        bottom: 10px;
     }
 }
