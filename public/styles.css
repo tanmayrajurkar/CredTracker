@@ -11,17 +11,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 10px;
 }
 
 .container {
     padding: 20px;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .card {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: 16px;
     padding: 24px;
-    width: 360px;
+    width: 90%;
+    max-width: 360px;
     color: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
@@ -230,6 +234,8 @@ body {
     align-items: center;
     justify-content: center;
     background: #f5f5f5;
+    width: 100%;
+    padding: 15px;
 }
 
 .auth-form {
@@ -240,14 +246,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 320px;
+    width: 90%;
+    max-width: 400px;
     gap: 18px;
 }
 
 .auth-title {
     color: #e60000;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 8px;
     text-decoration: underline;
@@ -468,6 +475,8 @@ body {
     align-items: center;
     justify-content: center;
     background: #f5f5f5;
+    width: 100%;
+    padding: 15px;
 }
 
 .onboarding-step {
@@ -478,14 +487,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 320px;
+    width: 90%;
+    max-width: 400px;
     gap: 18px;
 }
 
 .onboarding-title {
     color: #2176bd;
     text-align: center;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 8px;
 }
@@ -551,13 +561,14 @@ body {
 
 .profile-popover {
     position: absolute;
-    top: 60px; /* Adjust based on header height */
+    top: 60px;
     right: 20px;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.15);
     padding: 20px;
-    width: 280px;
+    width: 90%;
+    max-width: 280px;
     z-index: 100;
     display: flex;
     flex-direction: column;
@@ -588,6 +599,7 @@ body {
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    width: 90%;
     max-width: 500px;
     margin: 40px auto;
     display: flex;
@@ -606,7 +618,7 @@ body {
 .edit-profile-view label {
     font-size: 1rem;
     color: #555;
-    margin-bottom: -10px; /* Adjust spacing */
+    margin-bottom: -10px;
 }
 
 .edit-profile-view .auth-input {
@@ -639,6 +651,22 @@ body {
     justify-content: center;
 }
 
+.app-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Tables - Make them horizontally scrollable on smaller screens */
+.main-table-container {
+    overflow-x: auto;
+}
+
+.credits-table, .details-table {
+    min-width: 600px;
+}
+
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -650,7 +678,7 @@ body {
     }
 
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.8em;
+        font-size: 1.4rem;
     }
 
     .auth-input, .onboarding-name, .onboarding-credits {
@@ -659,8 +687,8 @@ body {
     }
 
     .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
-        padding: 10px 15px;
-        font-size: 1em;
+        padding: 6px 12px;
+        font-size: 0.9rem;
     }
 
     .credits-table-container, .details-container {
@@ -669,7 +697,7 @@ body {
 
     .credits-table, .details-table {
         width: 100%;
-        min-width: 600px; /* Ensure table doesn't shrink too much */
+        min-width: 600px;
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
@@ -681,11 +709,34 @@ body {
         padding: 6px 10px;
         font-size: 0.85em;
     }
+
+    .header-row {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-around;
+    }
+
+    .profile-popover {
+        right: 10px;
+        top: 80px;
+        width: 95%;
+        max-width: 250px;
+    }
+
+    .edit-profile-view {
+        padding: 20px;
+        margin: 20px auto;
+    }
 }
 
 @media (max-width: 480px) {
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.5em;
+        font-size: 1.2rem;
     }
 
     .auth-btn-row {
@@ -695,35 +746,31 @@ body {
 
     .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
         width: 100%;
+        font-size: 1rem;
     }
 
     .header-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+        padding: 8px;
     }
 
     .header-actions {
-        width: 100%;
-        justify-content: space-around;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .profile-popover {
         right: 5px;
-        width: calc(100% - 10px);
-        font-size: 0.9em;
-    }
-
-    .edit-profile-view {
-        padding: 15px;
-    }
-
-    .credits-table, .details-table {
-        min-width: 450px; /* Further reduce min-width for very small screens */
+        top: 90px;
+        max-width: unset;
+        width: 95%;
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        padding: 6px 8px;
         font-size: 0.8em;
+        padding: 6px 8px;
+    }
+
+    .add-row-btn, .delete-row-btn {
+        font-size: 0.85rem;
     }
 } 
