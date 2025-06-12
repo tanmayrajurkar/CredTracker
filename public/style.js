@@ -4,6 +4,28 @@ const supabaseKey = window.config.SUPABASE_KEY;
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 window.supabaseClient = supabase;
 
+// Set up auth state change listener
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    window.currentUser = session.user;
+    await loadUserProfile();
+    if (userProfile && userProfile.onboarding_complete) {
+      showAppView();
+    } else {
+      showOnboardingView();
+    }
+  } else if (event === 'SIGNED_OUT') {
+    window.currentUser = null;
+    userProfile = null;
+    showAuthView();
+  }
+});
+
+// Check session on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkSession();
+});
+
 let categories = []
 let baskets = []
 let changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] }
