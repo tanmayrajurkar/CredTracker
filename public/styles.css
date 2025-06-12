@@ -669,26 +669,24 @@ body {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0;
     }
 
     .auth-container, .onboarding-container, .app-container {
-        max-width: 95%;
         padding: 15px;
     }
 
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
     }
 
     .auth-input, .onboarding-name, .onboarding-credits {
-        padding: 10px;
-        font-size: 1em;
+        font-size: 0.95rem;
     }
 
     .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
-        padding: 6px 12px;
-        font-size: 0.9rem;
+        padding: 10px 20px;
+        font-size: 0.95rem;
     }
 
     .credits-table-container, .details-container {
@@ -696,81 +694,92 @@ body {
     }
 
     .credits-table, .details-table {
+        display: block;
         width: 100%;
         min-width: 600px;
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        padding: 8px 10px;
-        font-size: 0.9em;
+        display: block;
+        width: 100%;
+        text-align: right;
+        padding: 8px 15px;
+    }
+
+    .credits-table th {
+        text-align: left;
+        background: #b3dfff;
+        color: #222;
+        font-weight: 600;
+        padding: 12px 15px;
     }
 
     .add-row-btn, .delete-row-btn {
-        padding: 6px 10px;
-        font-size: 0.85em;
+        padding: 6px 12px;
+        font-size: 0.9rem;
     }
 
     .header-row {
         flex-direction: column;
-        gap: 10px;
+        align-items: center;
         padding: 10px;
     }
 
     .header-actions {
-        width: 100%;
-        justify-content: space-around;
+        margin-top: 10px;
+        justify-content: center;
     }
 
     .profile-popover {
-        right: 10px;
-        top: 80px;
-        width: 95%;
-        max-width: 250px;
+        width: 90%;
+        right: 5%;
+        left: 5%;
+        transform: translateX(0);
     }
 
     .edit-profile-view {
+        width: 90%;
         padding: 20px;
-        margin: 20px auto;
     }
 }
 
 @media (max-width: 480px) {
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
     }
 
     .auth-btn-row {
         flex-direction: column;
-        gap: 10px;
     }
 
     .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
         width: 100%;
-        font-size: 1rem;
+        margin: 5px 0;
     }
 
     .header-row {
+        flex-direction: column;
+        align-items: center;
         padding: 8px;
     }
 
     .header-actions {
-        flex-wrap: wrap;
+        margin-top: 8px;
         justify-content: center;
     }
 
     .profile-popover {
-        right: 5px;
-        top: 90px;
-        max-width: unset;
         width: 95%;
+        right: 2.5%;
+        left: 2.5%;
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        font-size: 0.8em;
-        padding: 6px 8px;
+        padding: 6px 10px;
     }
 
     .add-row-btn, .delete-row-btn {
+        padding: 5px 10px;
         font-size: 0.85rem;
     }
 } 
