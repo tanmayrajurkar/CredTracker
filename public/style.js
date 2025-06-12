@@ -112,14 +112,6 @@ function showTooltip(infoIconElement, floatingTooltipElement) {
 function hideTooltip(floatingTooltipElement) {
   console.log('hideTooltip: Removing visible class from tooltip.');
   floatingTooltipElement.classList.remove('visible');
-  // After transition, ensure it's fully hidden and not taking up space
-  setTimeout(() => {
-    if (!floatingTooltipElement.classList.contains('visible')) { // Only hide if it's truly not visible
-      console.log('hideTooltip: Setting display none and visibility hidden.');
-      floatingTooltipElement.style.display = 'none';
-      floatingTooltipElement.style.visibility = 'hidden';
-    }
-  }, 200); // Match transition duration
 }
 
 // Renamed this function to be more explicit about its purpose
