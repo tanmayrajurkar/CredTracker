@@ -75,12 +75,9 @@ const newPasswordInput = document.getElementById('new-password');
 const changePasswordBtn = document.getElementById('change-password-btn');
 const changePasswordMessage = document.getElementById('change-password-message');
 
-const infoIcon = document.getElementById('test-tooltip-trigger');
-const floatingTooltip = document.getElementById('floating-tooltip');
-
 const homeBtn = document.getElementById('home-btn');
 
-function showTooltip() {
+function showTooltip(infoIconElement, floatingTooltipElement) {
   const totalCreditsSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.total_credits) || 0), 0);
   const userTotalCreditsToComplete = userProfile ? (userProfile.total_credits_to_complete || 0) : 0;
 
@@ -93,53 +90,61 @@ function showTooltip() {
     dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
   }
 
-  console.log('Dynamic Tooltip Message:', dynamicTooltipMessage);
-  floatingTooltip.textContent = dynamicTooltipMessage;
-  console.log('Floating Tooltip Text Content after assignment:', floatingTooltip.textContent);
+  floatingTooltipElement.textContent = dynamicTooltipMessage;
 
   // Get dimensions and position it
-  const rect = infoIcon.getBoundingClientRect();
+  const rect = infoIconElement.getBoundingClientRect();
   const scrollY = window.scrollY || window.pageYOffset;
   const scrollX = window.scrollX || window.pageXOffset;
-  const tooltipWidth = floatingTooltip.offsetWidth;
-  const tooltipHeight = floatingTooltip.offsetHeight;
+  const tooltipWidth = floatingTooltipElement.offsetWidth;
+  const tooltipHeight = floatingTooltipElement.offsetHeight;
 
-  floatingTooltip.style.left = (rect.left + rect.width / 2 + scrollX - tooltipWidth / 2) + 'px';
-  floatingTooltip.style.top = (rect.top + scrollY - tooltipHeight - 12) + 'px';
+  floatingTooltipElement.style.left = (rect.left + rect.width / 2 + scrollX - tooltipWidth / 2) + 'px';
+  floatingTooltipElement.style.top = (rect.top + scrollY - tooltipHeight - 12) + 'px';
 
   // Make it visible with the transition
-  floatingTooltip.classList.add('visible');
+  floatingTooltipElement.classList.add('visible');
 }
 
-function hideTooltip() {
-  floatingTooltip.classList.remove('visible');
+function hideTooltip(floatingTooltipElement) {
+  floatingTooltipElement.classList.remove('visible');
   // After transition, ensure it's fully hidden and not taking up space
   setTimeout(() => {
-    if (!floatingTooltip.classList.contains('visible')) { // Only hide if it's truly not visible
-      floatingTooltip.style.display = 'none';
-      floatingTooltip.style.visibility = 'hidden';
+    if (!floatingTooltipElement.classList.contains('visible')) { // Only hide if it's truly not visible
+      floatingTooltipElement.style.display = 'none';
+      floatingTooltipElement.style.visibility = 'hidden';
     }
   }, 200); // Match transition duration
 }
 
-if (infoIcon && floatingTooltip) {
-  infoIcon.addEventListener('mouseenter', showTooltip);
-  infoIcon.addEventListener('focus', showTooltip);
-  infoIcon.addEventListener('mouseleave', hideTooltip);
-  infoIcon.addEventListener('blur', hideTooltip);
-  infoIcon.addEventListener('click', function(e) {
-    if (floatingTooltip.classList.contains('visible')) {
-      hideTooltip();
-    } else {
-      showTooltip();
-    }
-    e.stopPropagation();
-  });
-  document.addEventListener('click', function(e) {
-    if (!infoIcon.contains(e.target) && !floatingTooltip.contains(e.target)) {
-      hideTooltip();
-    }
-  });
+// Renamed this function to be more explicit about its purpose
+function setupGlobalTooltipListeners() {
+  // Query elements inside this function to ensure they are current after DOM updates
+  const infoIcon = document.getElementById('test-tooltip-trigger');
+  const floatingTooltip = document.getElementById('floating-tooltip');
+
+  if (infoIcon && floatingTooltip) {
+    // Use arrow functions to correctly capture `infoIcon` and `floatingTooltip`
+    infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, floatingTooltip));
+    infoIcon.addEventListener('focus', () => showTooltip(infoIcon, floatingTooltip));
+    infoIcon.addEventListener('mouseleave', () => hideTooltip(floatingTooltip));
+    infoIcon.addEventListener('blur', () => hideTooltip(floatingTooltip));
+    infoIcon.addEventListener('click', function(e) {
+      if (floatingTooltip.classList.contains('visible')) {
+        hideTooltip(floatingTooltip);
+      } else {
+        showTooltip(infoIcon, floatingTooltip);
+      }
+      e.stopPropagation();
+    });
+    document.addEventListener('click', function(e) {
+      if (!infoIcon.contains(e.target) && !floatingTooltip.contains(e.target)) {
+        hideTooltip(floatingTooltip);
+      }
+    });
+  } else {
+    console.warn("Info icon or floating tooltip not found for event listeners setup.");
+  }
 }
 
 loginBtn.onclick = async () => {
@@ -682,8 +687,4 @@ function addMainTableListeners() {
       detailsRow.style.display = 'none'
     }
   })
-}
-
-function setupGlobalTooltipListeners() {
-  // Implementation of setupGlobalTooltipListeners function
 }
