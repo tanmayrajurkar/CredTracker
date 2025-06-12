@@ -5,46 +5,26 @@
     font-family: 'Inter', sans-serif;
 }
 
-/* Ensure images are responsive */
-img {
-    max-width: 100%;
-    height: auto;
-    display: block; /* Remove extra space below images */
-}
-
-html {
-    font-size: 16px; /* Base font size for rem calculations */
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden; /* Prevent horizontal scroll bar on small screens */
-}
-
 body {
     background-color: #f5f5f5;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    padding: 1rem; /* Use rem for body padding */
-    box-sizing: border-box; /* Re-confirm for body */
+    justify-content: center;
+    padding: 10px;
 }
 
 .container {
-    padding: 1rem; /* Use rem */
+    padding: 20px;
     width: 100%;
     max-width: 1200px;
-    margin: 0 auto;
 }
 
 .card {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     border-radius: 16px;
-    padding: 1.5rem;
-    width: 95%;
+    padding: 24px;
+    width: 90%;
     max-width: 360px;
     color: white;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -105,10 +85,10 @@ body {
     text-align: center;
     color: #e60000;
     text-decoration: underline;
-    margin: 1.5rem 0;
-    font-size: 1.8rem;
+    margin-bottom: 32px;
+    margin-top: 16px;
+    font-size: 1.5rem;
     font-weight: 500;
-    word-wrap: break-word; /* Ensure long headings break words */
 }
 
 .credits-table {
@@ -201,10 +181,10 @@ body {
 
 .editable-input {
     width: 100%;
-    padding: 8px;
+    padding: 6px 8px;
     border: 1px solid #b3d7f7;
     border-radius: 4px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     background: #f9f9f9;
 }
 
@@ -213,7 +193,7 @@ body {
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 8px 15px;
+    padding: 8px 16px;
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
@@ -246,65 +226,71 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    max-width: 0; /* Important for ellipsis to work in flexible columns */
-    word-break: break-all; /* Force long words to break */
 }
 
-.auth-container, .onboarding-container, .app-container {
+.auth-container {
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     background: #f5f5f5;
     width: 100%;
-    padding: 1rem;
-    box-sizing: border-box; /* Re-confirm for these containers */
+    padding: 15px;
 }
 
-.auth-form, .onboarding-step {
+.auth-form {
     background: #fff;
-    padding: 2rem 1.5rem;
+    padding: 36px 32px 28px 32px;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 95%;
-    max-width: 450px; /* Slightly increased max-width for better look on medium screens */
-    gap: 1rem;
-    margin: 0 auto;
-    box-sizing: border-box; /* Re-confirm for forms */
+    width: 90%;
+    max-width: 400px;
+    gap: 18px;
 }
 
 .auth-title {
     color: #e60000;
     text-align: center;
     font-size: 1.8rem;
-    word-wrap: break-word; /* Ensure long titles break words */
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-decoration: underline;
 }
 
 .auth-input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 10px 12px;
+    border: 1px solid #b3d7f7;
+    border-radius: 6px;
     font-size: 1rem;
-    box-sizing: border-box; /* Re-confirm for inputs */
+    background: #f9f9f9;
+    margin-bottom: 4px;
 }
 
 .auth-btn-row {
     display: flex;
-    gap: 0.75rem;
+    gap: 12px;
     width: 100%;
     justify-content: center;
-    flex-wrap: wrap;
 }
 
-.auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn {
-    flex-grow: 1;
-    padding: 0.75rem 1.25rem;
+.auth-btn {
+    background: #2176bd;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
     font-size: 1rem;
-    min-width: 120px;
-    box-sizing: border-box; /* Re-confirm for buttons */
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.auth-btn:hover {
+    background: #155a8a;
 }
 
 .auth-message {
@@ -325,12 +311,11 @@ body {
     color: #fff;
     border: none;
     border-radius: 6px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.9rem;
+    padding: 8px 18px;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.2s;
-    box-sizing: border-box; /* Re-confirm for logout button */
 }
 
 .logout-btn:hover {
@@ -484,45 +469,59 @@ body {
     pointer-events: none;
 }
 
+.onboarding-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    width: 100%;
+    padding: 15px;
+}
+
+.onboarding-step {
+    background: #fff;
+    padding: 36px 32px 28px 32px;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 400px;
+    gap: 18px;
+}
+
 .onboarding-title {
     color: #2176bd;
     text-align: center;
-    font-size: 1.7rem;
+    font-size: 1.8rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
-    word-wrap: break-word; /* Ensure long titles break words */
+    margin-bottom: 8px;
 }
 
 .header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
+    padding: 12px 20px;
     background-color: #e0f2ff;
     border-bottom: 1px solid #b3dfff;
-    margin-bottom: 1rem;
+    margin-bottom: 20px;
     border-radius: 8px;
-    flex-wrap: wrap;
-    box-sizing: border-box; /* Re-confirm for header */
 }
 
 .header-branding {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 600;
     color: #e60000;
     text-decoration: underline;
-    margin-right: 1rem;
-    flex-basis: 100%; /* Allow branding to take full width on wrap */
-    text-align: center; /* Center branding when wrapped */
 }
 
 .header-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 10px;
     align-items: center;
-    flex-wrap: wrap;
-    justify-content: center; /* Center actions when wrapped */
-    width: 100%; /* Ensure actions take full width */
 }
 
 .header-icon-btn {
@@ -538,8 +537,9 @@ body {
 }
 
 .header-icon-btn svg {
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 28px;
+    height: 28px;
+    color: #2176bd;
 }
 
 .header-icon-btn:hover {
@@ -561,19 +561,18 @@ body {
 
 .profile-popover {
     position: absolute;
-    top: 4rem;
-    right: 1rem;
+    top: 60px;
+    right: 20px;
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-    padding: 1rem;
-    width: calc(100% - 2rem);
+    padding: 20px;
+    width: 90%;
     max-width: 280px;
     z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    box-sizing: border-box; /* Re-confirm for popover */
+    gap: 12px;
 }
 
 .profile-popover .profile-title {
@@ -597,16 +596,15 @@ body {
 
 .edit-profile-view {
     background: #fff;
-    padding: 2rem;
+    padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-    width: 95%;
-    max-width: 550px;
-    margin: 2rem auto;
+    width: 90%;
+    max-width: 500px;
+    margin: 40px auto;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    box-sizing: border-box; /* Re-confirm for edit view */
+    gap: 15px;
 }
 
 .edit-profile-title {
@@ -657,240 +655,122 @@ body {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
-    box-sizing: border-box; /* Re-confirm for app container */
+    padding: 10px;
 }
 
 /* Tables - Make them horizontally scrollable on smaller screens */
 .main-table-container {
     overflow-x: auto;
-    width: 100%;
-    box-sizing: border-box; /* Re-confirm for table container */
 }
 
 .credits-table, .details-table {
-    width: 100%;
-    border-collapse: collapse;
-    /* min-width removed to allow tables to shrink freely, rely on scroll */
-}
-
-.credits-table th, .credits-table td, .details-table th, .details-table td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-    vertical-align: middle;
-    font-size: 0.9rem;
-}
-
-.credits-table th, .details-table th {
-    font-size: 1rem;
-}
-
-.credits-table td {
-    color: #222;
-    font-weight: 400;
-}
-
-.details-table td {
-    color: #222;
-    font-weight: 400;
+    min-width: 600px;
 }
 
 @media (max-width: 768px) {
-    html {
-        font-size: 15px;
-    }
-
     body {
-        padding: 0.5rem;
+        padding: 10px;
     }
 
     .auth-container, .onboarding-container, .app-container {
-        padding: 0.5rem;
-    }
-
-    .auth-form, .onboarding-step, .edit-profile-view {
-        padding: 1.5rem;
-        gap: 0.8rem;
-        width: 98%;
-        max-width: 400px;
+        max-width: 95%;
+        padding: 15px;
     }
 
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
+    }
+
+    .auth-input, .onboarding-name, .onboarding-credits {
+        padding: 10px;
+        font-size: 1em;
+    }
+
+    .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+
+    .credits-table-container, .details-container {
+        overflow-x: auto;
+    }
+
+    .credits-table, .details-table {
+        width: 100%;
+        min-width: 600px;
+    }
+
+    .credits-table th, .credits-table td, .details-table th, .details-table td {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    .add-row-btn, .delete-row-btn {
+        padding: 6px 10px;
+        font-size: 0.85em;
     }
 
     .header-row {
         flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
-    }
-
-    .header-branding {
-        width: 100%;
-        text-align: center;
-        margin-right: 0;
-        margin-bottom: 0.5rem;
+        gap: 10px;
+        padding: 10px;
     }
 
     .header-actions {
         width: 100%;
-        justify-content: center;
-        gap: 0.4rem;
-    }
-
-    .header-icon-btn svg {
-        width: 1.4rem;
-        height: 1.4rem;
-    }
-
-    .logout-btn {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.8rem;
+        justify-content: space-around;
     }
 
     .profile-popover {
-        top: 5rem;
-        right: 0.5rem;
-        width: calc(100% - 1rem);
-        padding: 0.8rem;
+        right: 10px;
+        top: 80px;
+        width: 95%;
+        max-width: 250px;
     }
 
-    .credits-table th, .credits-table td, .details-table th, .details-table td {
-        font-size: 0.75rem; /* Slightly smaller font for medium screens */
-        padding: 0.5rem 0.75rem;
+    .edit-profile-view {
+        padding: 20px;
+        margin: 20px auto;
     }
-
-    .editable-input {
-        padding: 0.5rem;
-        font-size: 0.85rem;
-    }
-
-    .add-row-btn, .delete-row-btn, .save-btn {
-        padding: 0.6rem 1rem;
-        font-size: 0.9rem;
-    }
-
-    /* Table column widths for medium screens - ensure they sum to 100% */
-    .credits-table th:nth-child(1), .credits-table td:nth-child(1) { width: 8%; }
-    .credits-table th:nth-child(2), .credits-table td:nth-child(2) { width: 32%; }
-    .credits-table th:nth-child(3), .credits-table td:nth-child(3) { width: 20%; }
-    .credits-table th:nth-child(4), .credits-table td:nth-child(4) { width: 20%; }
-    .credits-table th:nth-child(5), .credits-table td:nth-child(5) { width: 10%; }
-    .credits-table th:nth-child(6), .credits-table td:nth-child(6) { width: 10%; }
-
-    .details-table th:nth-child(1), .details-table td:nth-child(1) { width: 35%; }
-    .details-table th:nth-child(2), .details-table td:nth-child(2) { width: 15%; }
-    .details-table th:nth-child(3), .details-table td:nth-child(3) { width: 15%; }
-    .details-table th:nth-child(4), .details-table td:nth-child(4) { width: 25%; }
-    .details-table th:nth-child(5), .details-table td:nth-child(5) { width: 10%; }
 }
 
 @media (max-width: 480px) {
-    html {
-        font-size: 14px;
-    }
-
-    body {
-        padding: 0.25rem;
-    }
-
-    .auth-container, .onboarding-container, .app-container {
-        padding: 0.25rem;
-    }
-
-    .auth-form, .onboarding-step, .edit-profile-view {
-        padding: 1rem;
-        gap: 0.5rem;
-        width: 100%;
-        max-width: unset;
-    }
-
     .auth-title, .onboarding-title, .credits-heading, .edit-profile-title {
-        font-size: 1.5rem;
-    }
-
-    .auth-input, .onboarding-name, .onboarding-credits {
-        font-size: 0.9rem;
-        padding: 0.6rem;
+        font-size: 1.2rem;
     }
 
     .auth-btn-row {
         flex-direction: column;
-        gap: 0.4rem;
+        gap: 10px;
     }
 
     .auth-btn, .onboarding-next-1, .onboarding-next-2, .onboarding-confirm-btn, .save-btn, .profile-btn {
         width: 100%;
-        font-size: 0.9rem;
-        padding: 0.6rem 0.8rem;
+        font-size: 1rem;
     }
 
     .header-row {
-        padding: 0.5rem;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .header-branding {
-        font-size: 1.3rem;
-        margin-bottom: 0.25rem;
-        text-align: center; /* Ensure it stays centered */
+        padding: 8px;
     }
 
     .header-actions {
-        gap: 0.25rem;
-    }
-
-    .header-icon-btn svg {
-        width: 1.3rem;
-        height: 1.3rem;
-    }
-
-    .logout-btn {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .profile-popover {
-        top: 5rem;
-        right: 0.25rem;
-        width: calc(100% - 0.5rem);
-        padding: 0.75rem;
-    }
-
-    .credits-table, .details-table {
-        /* min-width removed - rely on overflow-x:auto */
+        right: 5px;
+        top: 90px;
+        max-width: unset;
+        width: 95%;
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        font-size: 0.6rem; /* Even smaller font for very small screens */
-        padding: 0.25rem 0.3rem;
-    }
-
-    .editable-input {
-        padding: 0.4rem;
-        font-size: 0.8rem;
+        font-size: 0.8em;
+        padding: 6px 8px;
     }
 
     .add-row-btn, .delete-row-btn {
-        font-size: 0.75rem;
-        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
     }
-
-    /* Aggressive table column width adjustments for very small screens - ensure they sum to 100% */
-    .credits-table th:nth-child(1), .credits-table td:nth-child(1) { width: 5%; }
-    .credits-table th:nth-child(2), .credits-table td:nth-child(2) { width: 30%; }
-    .credits-table th:nth-child(3), .credits-table td:nth-child(3) { width: 18%; }
-    .credits-table th:nth-child(4), .credits-table td:nth-child(4) { width: 18%; }
-    .credits-table th:nth-child(5), .credits-table td:nth-child(5) { width: 14%; }
-    .credits-table th:nth-child(6), .credits-table td:nth-child(6) { width: 15%; }
-
-    .details-table th:nth-child(1), .details-table td:nth-child(1) { width: 40%; }
-    .details-table th:nth-child(2), .details-table td:nth-child(2) { width: 15%; }
-    .details-table th:nth-child(3), .details-table td:nth-child(3) { width: 15%; }
-    .details-table th:nth-child(4), .details-table td:nth-child(4) { width: 20%; }
-    .details-table th:nth-child(5), .details-table td:nth-child(5) { width: 10%; }
 } 
