@@ -233,9 +233,7 @@ body {
 
 /* Ensure table cells don't overflow */
 .credits-table td, .details-table td {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
 }
 
 .auth-container {
@@ -677,29 +675,30 @@ body {
     padding: 10px;
 }
 
-/* Tables - Make them horizontally scrollable on smaller screens */
-.main-table-container {
-    overflow-x: auto;
-}
-
-.credits-table-container, .details-container {
-    overflow-x: auto;
+/* Main Table and Details Table Responsiveness */
+.main-table-container, .credits-table-container, .details-container {
+    width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling for tables */
+    margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    box-sizing: border-box; /* Include padding in width calculation */
 }
 
 .credits-table, .details-table {
-    width: 100%;
-    min-width: 600px;
+    width: 100%; /* Ensure tables take full width of their container */
+    min-width: 600px; /* Minimum width to prevent excessive squishing on larger screens */
     border-collapse: collapse;
-    margin-bottom: 40px;
+    margin-bottom: 0; /* Reset margin, container has margin */
     background: #fff;
+    display: table; /* Ensure table display property is correct */
 }
 
 .credits-table th, .credits-table td, .details-table th, .details-table td {
-    padding: 12px 10px;
+    padding: 12px 10px; /* Slightly reduce padding for smaller screens */
     border-bottom: 1px solid #eee;
     text-align: left;
     vertical-align: middle;
-    white-space: nowrap;
+    white-space: normal; /* Allow text to wrap within cells */
 }
 
 .credits-table th {
@@ -718,34 +717,34 @@ body {
     }
 
     .header-row {
-        flex-direction: column;
+        flex-direction: column; /* Stack header items vertically */
         align-items: center;
     }
 
     .header-actions {
         margin-top: 10px;
-        justify-content: center;
-        width: 100%;
+        justify-content: center; /* Center action buttons */
+        width: 100%; /* Take full width to center buttons */
     }
 
     .credits-table, .details-table {
-        min-width: auto;
+        min-width: 450px; /* Adjust min-width for tablets */
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        font-size: 0.9rem;
-        padding: 8px;
+        font-size: 0.9rem; /* Smaller font size for table content */
+        padding: 8px; /* Further reduce padding */
     }
 
     .editable-input {
-        max-width: 120px;
+        max-width: 120px; /* Adjust input width for smaller screens */
         font-size: 0.9rem;
     }
 
     .add-row-btn, .delete-row-btn, .save-btn {
         font-size: 0.85rem;
         padding: 6px 10px;
-        margin: 5px 2px;
+        margin: 5px 2px; /* Adjust margin for smaller buttons */
     }
 
     .save-btn {
@@ -757,8 +756,8 @@ body {
         left: 5%;
         right: 5%;
         top: auto;
-        bottom: 20px;
-        transform: translateX(0);
+        bottom: 20px; /* Position at bottom for better mobile access */
+        transform: translateX(0); /* Ensure no horizontal translation */
     }
 
     .auth-container, .onboarding-container, .app-container {
@@ -776,18 +775,47 @@ body {
     }
 
     .credits-heading, .details-heading, .auth-title, .onboarding-title, .edit-profile-title {
-        font-size: 1.2rem;
+        font-size: 1.2rem; /* Even smaller headings */
         margin-bottom: 20px;
     }
 
+    .credits-table, .details-table {
+        min-width: 380px; /* Re-introduce a min-width to ensure columns are somewhat wide, enabling horizontal scroll */
+        display: table; /* Ensure table display property is correct */
+        width: 100%; /* Ensure it takes full width of container */
+        overflow-x: auto; /* Re-enable scroll specifically for this breakpoint */
+    }
+
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        font-size: 0.8rem;
+        font-size: 0.8rem; /* Smallest font size for table content */
         padding: 6px;
+        /* Reverted display: block and width: 100% to allow for horizontal scrolling of table cells */
+        display: table-cell; /* Revert to table-cell display */
+        width: auto; /* Allow width to be determined by content and table layout */
+        box-sizing: border-box; /* Include padding in width */
+        white-space: normal; /* Ensure wrapping */
+        text-align: left; /* Keep text aligned left */
+    }
+
+    /* Hide headers on small screens and use data attributes for labels if needed */
+    .credits-table thead, .details-table thead {
+        display: table-header-group; /* Show headers to ensure columns are correctly rendered */
+    }
+
+    .credits-table tbody tr, .details-table tbody tr {
+        margin-bottom: 0; /* Reset margin */
+        display: table-row; /* Revert to table-row display */
+        border: none; /* Remove border */
+    }
+
+    .credits-table tbody td:first-child, .details-table tbody td:first-child {
+        font-weight: normal; /* Revert font weight */
+        background-color: transparent; /* Revert background color */
     }
 
     .editable-input {
         font-size: 0.8rem;
-        max-width: 80px;
+        max-width: 100%; /* Allow inputs to take full width */
     }
 
     .add-row-btn, .delete-row-btn, .save-btn {
@@ -806,16 +834,16 @@ body {
     }
 
     .header-icon-btn {
-        padding: 5px;
+        padding: 5px; /* Reduce padding for header icons */
     }
 
     .header-actions {
-        flex-direction: column;
+        flex-direction: column; /* Stack header actions on very small screens */
         gap: 5px;
     }
 
     .logout-row {
-        flex-direction: column;
+        flex-direction: column; /* Stack logout button on very small screens */
     }
 
     .profile-popover {
