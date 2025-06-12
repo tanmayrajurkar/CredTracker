@@ -491,7 +491,7 @@ function renderMainTable() {
       <td><input class="editable-input" type="number" value="${cat.sl_no ?? ''}" data-type="category" data-id="${cat.id}" data-field="sl_no"></td>
       <td><input class="editable-input" type="text" value="${cat.category ?? ''}" data-type="category" data-id="${cat.id}" data-field="category"></td>
       <td><input class="editable-input" type="number" value="${cat.total_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="total_credits"></td>
-      <td><input class="editable-input" type="number" value="${cat.earned_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="earned_credits"></td>
+      <td><input class="editable-input" type="number" value="${cat.earned_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="earned_credits" autocomplete="off"></td>
       <td><button class="view-btn" data-toggle="${cat.id}">+</button></td>
       <td><button class="delete-row-btn" data-delete="category" data-id="${cat.id}">Delete</button></td>
     `;
@@ -562,7 +562,7 @@ function renderDetailsTable(categoryId) {
     html += `<tr>
       <td><input class="editable-input" type="text" value="${basket.basket_name ?? ''}" data-type="basket" data-id="${basket.id}" data-field="basket_name"></td>
       <td><input class="editable-input" type="number" value="${basket.min_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="min_credits"></td>
-      <td><input class="editable-input" type="number" value="${basket.earned_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="earned_credits"></td>
+      <td><input class="editable-input" type="number" value="${basket.earned_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="earned_credits" autocomplete="off"></td>
       <td><input class="editable-input" type="number" value="${basket.remaining_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="remaining_credits"></td>
       <td><button class="delete-row-btn" data-delete="basket" data-id="${basket.id}">Delete</button></td>
     </tr>`
