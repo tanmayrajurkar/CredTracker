@@ -17,13 +17,12 @@ try {
             window.currentUser = session.user;
             // Dispatch a custom event that style.js can listen to
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
-                detail: { event, session, userProfile: window.userProfile }
+                detail: { event, session }
             }));
         } else if (event === 'SIGNED_OUT') {
             window.currentUser = null;
-            window.userProfile = null;
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
-                detail: { event, session: null, userProfile: null }
+                detail: { event, session: null }
             }));
         }
     });
@@ -33,7 +32,7 @@ try {
         if (session) {
             window.currentUser = session.user;
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
-                detail: { event: 'SIGNED_IN', session, userProfile: window.userProfile }
+                detail: { event: 'SIGNED_IN', session }
             }));
         }
     });

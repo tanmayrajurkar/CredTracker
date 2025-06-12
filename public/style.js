@@ -6,15 +6,20 @@ let userProfile = null;
 
 // Listen for auth state changes
 window.addEventListener('authStateChanged', async (event) => {
-    const { event: authEvent, session, userProfile: profile } = event.detail;
+    const { event: authEvent, session } = event.detail;
     
     if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED') {
-        if (profile && profile.onboarding_complete) {
+        // Load user profile first
+        await loadUserProfile();
+        
+        // Then check onboarding status
+        if (userProfile && userProfile.onboarding_complete) {
             showAppView();
         } else {
             showOnboardingView();
         }
     } else if (authEvent === 'SIGNED_OUT') {
+        userProfile = null;
         showAuthView();
     }
 });
