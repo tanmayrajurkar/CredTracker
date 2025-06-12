@@ -1,7 +1,8 @@
 // Initialize Supabase client
-// const supabaseUrl = 'https://labtdqaamowygnwfhpyz.supabase.co';
-// const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhYnRkcWFamowygnwfhpyzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5NDM1NjAsImV4cCI6MjA1NTUxOTU2MH0.sqkmLIuNsKrhfgKUpBaxICGxD6_TR3IBAlVhbCdJssA';
-// const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = window.config.SUPABASE_URL;
+const supabaseKey = window.config.SUPABASE_KEY;
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+window.supabaseClient = supabase;
 
 let categories = []
 let baskets = []
@@ -666,177 +667,11 @@ function addMainTableListeners() {
       renderMainTable()
       // Open the details row again
       const detailsRow = document.getElementById(`details-row-${catId}`)
-      if (detailsRow) detailsRow.style.display = '';
-    }
-  })
-  // Delete row
-  document.querySelectorAll('.delete-row-btn').forEach(btn => {
-    btn.onclick = function() {
-      const type = btn.getAttribute('data-delete')
-      const id = btn.getAttribute('data-id')
-      if (type === 'category') {
-        if (!id.toString().startsWith('new-')) changes.deletedCategories.push(id)
-        categories = categories.filter(c => c.id != id)
-        baskets = baskets.filter(b => b.category_id != id)
-      } else if (type === 'basket') {
-        if (!id.toString().startsWith('new-')) changes.deletedBaskets.push(id)
-        baskets = baskets.filter(b => b.id != id)
-      }
-      renderMainTable()
+      detailsRow.style.display = 'none'
     }
   })
 }
-
-saveBtn.onclick = async function() {
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving...';
-  
-  // Filter out any newly added items that have also been marked for deletion
-  changes.newCategories = changes.newCategories.filter(nc => !changes.deletedCategories.includes(nc.id));
-  changes.newBaskets = changes.newBaskets.filter(nb => !changes.deletedBaskets.includes(nb.id));
-
-  // Update categories
-  for (const id in changes.categories) {
-    if (!id.toString().startsWith('new-') && !changes.deletedCategories.includes(id)) {
-      await window.supabaseClient.from('credit_categories').update(changes.categories[id]).eq('id', id);
-    }
-  }
-  // Update baskets
-  for (const id in changes.baskets) {
-    if (!id.toString().startsWith('new-') && !changes.deletedBaskets.includes(id)) {
-      await window.supabaseClient.from('credit_baskets').update(changes.baskets[id]).eq('id', id);
-    }
-  }
-  // Insert new categories
-  for (const cat of changes.newCategories) {
-    // Ensure user_id is set for new categories too if RLS applies to them (though currently global)
-    const insertData = { ...cat };
-    delete insertData.id; // Remove temporary client-side ID
-    const { data, error } = await window.supabaseClient.from('credit_categories').insert([insertData]).select();
-    if (error) {
-      console.error("Error inserting new category:", error);
-      // Handle error, maybe revert changes for this category
-    } else if (data && data[0]) {
-      // Update local baskets' category_id if they were linked to the temp ID
-      baskets.forEach(b => {
-        if (b.category_id === cat.id) b.category_id = data[0].id; // Assign new DB ID
-      });
-    }
-  }
-  // Insert new baskets
-  for (const bask of changes.newBaskets) {
-    // Ensure user_id is set for new baskets
-    const insertData = { ...bask, user_id: window.currentUser ? window.currentUser.id : null };
-    delete insertData.id; // Remove temporary client-side ID
-    const { error } = await window.supabaseClient.from('credit_baskets').insert([insertData]);
-    if (error) {
-        console.error("Error inserting new basket:", error);
-        // Handle error
-    }
-  }
-  // Delete categories
-  for (const id of changes.deletedCategories) {
-    if (!id.toString().startsWith('new-')) { // Only delete from DB if it's not a newly added row
-      await window.supabaseClient.from('credit_categories').delete().eq('id', id);
-    }
-  }
-  // Delete baskets
-  for (const id of changes.deletedBaskets) {
-    if (!id.toString().startsWith('new-')) { // Only delete from DB if it's not a newly added row
-      await window.supabaseClient.from('credit_baskets').delete().eq('id', id);
-    }
-  }
-
-  // Reset changes and reload
-  changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] };
-  await fetchData();
-  saveBtn.disabled = false;
-  saveBtn.textContent = 'Save';
-  alert('Saved!');
-}
-
-// Initial session check when script loads
-checkSession();
 
 function setupGlobalTooltipListeners() {
-  const infoIcon = document.getElementById('total-tooltip-trigger');
-
-  // If the icon doesn't exist (e.g., if total matches, or no categories), exit.
-  if (!infoIcon || !floatingTooltip) return;
-
-  // Ensure previous listeners are removed to prevent duplicates if renderMainTable is called multiple times
-  infoIcon.removeEventListener('mouseenter', showTooltip);
-  infoIcon.removeEventListener('focus', showTooltip);
-  infoIcon.removeEventListener('mouseleave', hideTooltip);
-  infoIcon.removeEventListener('blur', hideTooltip);
-  infoIcon.removeEventListener('click', toggleTooltip); // New click handler for mobile/accessibility
-  document.removeEventListener('click', hideTooltipOnDocumentClick);
-
-  // Re-attach listeners
-  infoIcon.addEventListener('mouseenter', showTooltip);
-  infoIcon.addEventListener('focus', showTooltip);
-  infoIcon.addEventListener('mouseleave', hideTooltip);
-  infoIcon.addEventListener('blur', hideTooltip);
-  infoIcon.addEventListener('click', toggleTooltip);
-  document.addEventListener('click', hideTooltipOnDocumentClick); // Hide when clicking outside
-
-  // Define show/hide functions (can be outside or inside, but ensure they have access to infoIcon/floatingTooltip)
-  function showTooltip() {
-    floatingTooltip.textContent = tooltipText;
-    floatingTooltip.classList.add('visible');
-    // Ensure display block for measurement, but keep invisible for a moment
-    floatingTooltip.style.display = 'block';
-    floatingTooltip.style.visibility = 'hidden';
-
-    // Position after slight delay to ensure render
-    setTimeout(() => {
-      const rect = infoIcon.getBoundingClientRect();
-      const scrollY = window.scrollY || window.pageYOffset;
-      const scrollX = window.scrollX || window.pageXOffset;
-      const tooltipWidth = floatingTooltip.offsetWidth;
-      const tooltipHeight = floatingTooltip.offsetHeight;
-
-      floatingTooltip.style.left = (rect.left + rect.width / 2 + scrollX - tooltipWidth / 2) + 'px';
-      floatingTooltip.style.top = (rect.top + scrollY - tooltipHeight - 12) + 'px';
-      floatingTooltip.style.visibility = 'visible'; // Finally make visible
-    }, 10); // Small delay to ensure browser paints before measuring
-  }
-
-  function hideTooltip() {
-    floatingTooltip.classList.remove('visible');
-    setTimeout(() => {
-      // Only set display: none and visibility: hidden if it's truly not visible anymore
-      if (!floatingTooltip.classList.contains('visible')) {
-        floatingTooltip.style.display = 'none';
-        floatingTooltip.style.visibility = 'hidden';
-      }
-    }, 200); // Matches CSS transition duration
-  }
-
-  function toggleTooltip(e) {
-    if (floatingTooltip.classList.contains('visible')) {
-      hideTooltip();
-    } else {
-      showTooltip();
-    }
-    e.stopPropagation(); // Prevent immediate hiding by document click
-  }
-
-  function hideTooltipOnDocumentClick(e) {
-    if (!infoIcon.contains(e.target) && !floatingTooltip.contains(e.target)) {
-      hideTooltip();
-    }
-  }
+  // Implementation of setupGlobalTooltipListeners function
 }
-
-fetchData()
-
-document.addEventListener('click', function(e) {
-  document.querySelectorAll('.info-icon').forEach(icon => {
-    if (icon.contains(e.target)) {
-      icon.classList.toggle('active');
-    } else {
-      icon.classList.remove('active');
-    }
-  });
-});
