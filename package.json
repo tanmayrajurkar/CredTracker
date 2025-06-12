@@ -2,12 +2,16 @@
   "name": "credits-app",
   "version": "1.0.0",
   "description": "Credits Distribution App",
-  "main": "server.js",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "start": "serve public",
+    "build": "mkdir -p public && cp -r index.html styles.css style.js config.js public/",
+    "dev": "serve public"
   },
   "dependencies": {
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "serve": "^14.2.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.3"
   }
 } 

@@ -1,4 +1,5 @@
-## CredTracker Application
+# CredTracker
+
 
 This is a modern, interactive web application designed to help users efficiently track their academic credits, categorize them, and monitor their progress towards program completion. Built with a focus on user experience and data persistence, this tool provides a clear overview of earned and remaining credits, ensuring users stay on track with their academic goals.
 
@@ -19,6 +20,50 @@ This is a modern, interactive web application designed to help users efficiently
 *   **Frontend**: HTML5, CSS3, JavaScript
 *   **Backend as a Service (BaaS)**: Supabase (for database, authentication, and real-time capabilities)
 *   **Local Development Server**: Node.js with Express and Dotenv (for serving static files and environment variables)
+
+## Local Development
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Start the development server:
+```bash
+npm run dev
+```
+
+## Deployment to Netlify
+
+1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+
+2. Log in to Netlify and click "New site from Git"
+
+3. Choose your repository and configure the build settings:
+   - Build command: `npm run build`
+   - Publish directory: `public`
+
+4. Add the following environment variables in Netlify's site settings:
+   - `SUPABASE_URL`: Your Supabase project URL
+   - `SUPABASE_KEY`: Your Supabase project API key
+
+5. Deploy!
+
+## Environment Variables
+
+The following environment variables are required:
+
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_KEY`: Your Supabase project API key
+
+## Project Structure
+
+- `public/`: Contains all static files for production
+- `index.html`: Main HTML file
+- `styles.css`: Main stylesheet
+- `style.js`: Main JavaScript file
+- `config.js`: Configuration file for environment variables
+
 
 ### Setup and Running the Project:
 
