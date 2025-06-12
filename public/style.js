@@ -526,7 +526,7 @@ function renderMainTable() {
     <td colspan="2" style="font-weight:600;">Total Credits</td>
     <td class="total-credits-cell${isMismatch ? ' mismatch' : ''}">
       ${totalCreditsSum}
-      ${isMismatch ? `<span class="info-icon" tabindex="0" id="total-tooltip-trigger">i</span>` : ''}
+      ${isMismatch ? `<span class="info-icon" tabindex="0" id="test-tooltip-trigger">i</span>` : ''}
     </td>
     <td style="font-weight:600;">${totalEarnedSum}</td>
     <td colspan="2" style="font-weight:600;">To Complete: ${userTotalCreditsToComplete}</td>
