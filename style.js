@@ -1,3 +1,5 @@
+console.log("style.js loaded.");
+
 // Initialize Supabase client
 // const supabaseUrl = 'https://labtdqaamowygnwfhpyz.supabase.co';
 // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxhYnRkcWFamowygnwfhpyzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5NDM1NjAsImV4cCI6MjA1NTUxOTU2MH0.sqkmLIuNsKrhfgKUpBaxICGxD6_TR3IBAlVhbCdJssA';
@@ -154,6 +156,7 @@ signupBtn.onclick = async () => {
 };
 
 async function checkSession() {
+  console.log("checkSession called.");
   const { data: { session } } = await window.supabaseClient.auth.getSession();
   if (session) {
     window.currentUser = session.user;
@@ -190,6 +193,7 @@ function showOnboardingView() {
 }
 
 function showAppView() {
+  console.log("showAppView called.");
   authContainer.style.display = 'none';
   onboardingContainer.style.display = 'none';
   appContainer.style.display = 'block';
@@ -689,6 +693,7 @@ function addMainTableListeners() {
 }
 
 saveBtn.onclick = async function() {
+  console.log("Save button clicked.");
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving...';
   
@@ -800,7 +805,7 @@ function setupGlobalTooltipListeners() {
     setTimeout(() => {
       const rect = infoIcon.getBoundingClientRect();
       const scrollY = window.scrollY || window.pageYOffset;
-      const scrollX = window.scrollX || window.pageXOffset;
+      const scrollX = window.scrollX || window.scrollX; // Changed from pageYOffset to scrollX
       const tooltipWidth = floatingTooltip.offsetWidth;
       const tooltipHeight = floatingTooltip.offsetHeight;
 
