@@ -77,12 +77,23 @@ const changePasswordMessage = document.getElementById('change-password-message')
 
 const infoIcon = document.getElementById('test-tooltip-trigger');
 const floatingTooltip = document.getElementById('floating-tooltip');
-const tooltipText = "Complete the table as all credits are not listed - total doesn't match";
 
 const homeBtn = document.getElementById('home-btn');
 
 function showTooltip() {
-  floatingTooltip.textContent = tooltipText;
+  const totalCreditsSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.total_credits) || 0), 0);
+  const userTotalCreditsToComplete = userProfile ? (userProfile.total_credits_to_complete || 0) : 0;
+
+  let dynamicTooltipMessage = "Complete the table as all credits are not listed - total doesn't match"; // Default message
+  if (totalCreditsSum > userTotalCreditsToComplete) {
+    dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are more than the required credits to complete (${userTotalCreditsToComplete}).`;
+  } else if (totalCreditsSum < userTotalCreditsToComplete) {
+    dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are less than the required credits to complete (${userTotalCreditsToComplete}).`;
+  } else {
+    dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
+  }
+
+  floatingTooltip.textContent = dynamicTooltipMessage;
 
   // 1. Make it block and invisible to get dimensions
   floatingTooltip.style.display = 'block';
