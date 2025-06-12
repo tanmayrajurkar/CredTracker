@@ -578,18 +578,22 @@ body {
 }
 
 .profile-popover {
-    position: absolute;
+    position: fixed;
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 1000;
+    z-index: 10000;
     padding: 20px;
     width: 280px;
-    right: 20px;
     top: 60px;
+    right: 20px;
+    left: auto;
+    transform: none;
     display: none;
     flex-direction: column;
     gap: 15px;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .profile-popover .profile-title {
@@ -753,11 +757,17 @@ body {
 
     .profile-popover {
         width: 90%;
-        left: 5%;
-        right: 5%;
+        max-width: 300px; /* Limit max width for tablets */
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
         top: auto;
-        bottom: 20px; /* Position at bottom for better mobile access */
-        transform: translateX(0); /* Ensure no horizontal translation */
+        bottom: 20px;
+        padding: 15px;
+    }
+
+    .profile-popover .profile-info p {
+        font-size: 0.95rem;
     }
 
     .auth-container, .onboarding-container, .app-container {
@@ -848,8 +858,16 @@ body {
 
     .profile-popover {
         width: 95%;
-        left: 2.5%;
-        right: 2.5%;
+        max-width: 95%; /* Allow full width on very small screens */
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        top: auto;
         bottom: 10px;
+        padding: 10px;
+    }
+
+    .profile-popover .profile-info p {
+        font-size: 0.9rem;
     }
 }
