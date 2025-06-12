@@ -663,8 +663,25 @@ body {
     overflow-x: auto;
 }
 
+.credits-table-container, .details-container {
+    overflow-x: auto;
+}
+
 .credits-table, .details-table {
     min-width: 600px;
+}
+
+.credits-table th, .credits-table td, .details-table th, .details-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.credits-table th {
+    background: #b3dfff;
+    color: #222;
+    font-weight: 600;
 }
 
 @media (max-width: 768px) {
@@ -690,28 +707,17 @@ body {
     }
 
     .credits-table-container, .details-container {
-        overflow-x: auto;
+        overflow-x: auto; /* Enable horizontal scrolling for tables */
     }
 
     .credits-table, .details-table {
-        display: block;
-        width: 100%;
-        min-width: 600px;
+        min-width: 600px; /* Ensure tables are wide enough for content */
     }
 
     .credits-table th, .credits-table td, .details-table th, .details-table td {
-        display: block;
-        width: 100%;
-        text-align: right;
-        padding: 8px 15px;
-    }
-
-    .credits-table th {
-        text-align: left;
-        background: #b3dfff;
-        color: #222;
-        font-weight: 600;
-        padding: 12px 15px;
+        /* Revert to default table cell display and padding from global styles */
+        /* Removed text-align, display: block, and width: 100% */
+        padding: 8px 15px; /* Adjust padding for smaller screens */
     }
 
     .add-row-btn, .delete-row-btn {
@@ -782,4 +788,4 @@ body {
         padding: 5px 10px;
         font-size: 0.85rem;
     }
-} 
+}
