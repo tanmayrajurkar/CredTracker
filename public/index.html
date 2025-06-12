@@ -44,13 +44,13 @@
     <div id="onboarding-container" class="onboarding-container" style="display:none;">
       <div id="onboarding-step-1" class="onboarding-step">
         <h2 class="onboarding-title">Welcome! What's your name?</h2>
-        <input type="text" id="onboarding-name" placeholder="Your Name" class="auth-input" required />
+        <input type="text" id="onboarding-name" placeholder="Your Name" class="auth-input" required autocomplete="off" />
         <button id="onboarding-next-1" class="auth-btn">Next</button>
       </div>
 
       <div id="onboarding-step-2" class="onboarding-step" style="display:none;">
         <h2 class="onboarding-title">How many credits to complete your program?</h2>
-        <input type="number" id="onboarding-credits" placeholder="e.g., 200" class="auth-input" min="0" required />
+        <input type="number" id="onboarding-credits" placeholder="e.g., 200" class="auth-input" min="0" required autocomplete="off" />
         <button id="onboarding-next-2" class="auth-btn">Next</button>
       </div>
 
@@ -91,10 +91,10 @@
       <div id="edit-profile-view" class="edit-profile-view" style="display:none;">
         <h2 class="edit-profile-title">Edit Your Profile</h2>
         <label for="edit-profile-name">Name:</label>
-        <input type="text" id="edit-profile-name" class="auth-input" />
+        <input type="text" id="edit-profile-name" class="auth-input" autocomplete="off" />
 
         <label for="edit-profile-total-credits">Total Credits to Complete:</label>
-        <input type="number" id="edit-profile-total-credits" class="auth-input" min="0" />
+        <input type="number" id="edit-profile-total-credits" class="auth-input" min="0" autocomplete="off" />
         
         <div class="auth-btn-row">
           <button id="save-edited-profile-btn" class="auth-btn">Save Changes</button>
