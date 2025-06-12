@@ -90,7 +90,10 @@ function showTooltip(infoIconElement, floatingTooltipElement) {
     dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
   }
 
+  console.log('showTooltip: Dynamic Tooltip Message:', dynamicTooltipMessage);
   floatingTooltipElement.textContent = dynamicTooltipMessage;
+  console.log('showTooltip: Floating Tooltip Text Content after assignment:', floatingTooltipElement.textContent);
+  console.log('showTooltip: Adding visible class to tooltip.');
 
   // Get dimensions and position it
   const rect = infoIconElement.getBoundingClientRect();
@@ -107,10 +110,12 @@ function showTooltip(infoIconElement, floatingTooltipElement) {
 }
 
 function hideTooltip(floatingTooltipElement) {
+  console.log('hideTooltip: Removing visible class from tooltip.');
   floatingTooltipElement.classList.remove('visible');
   // After transition, ensure it's fully hidden and not taking up space
   setTimeout(() => {
     if (!floatingTooltipElement.classList.contains('visible')) { // Only hide if it's truly not visible
+      console.log('hideTooltip: Setting display none and visibility hidden.');
       floatingTooltipElement.style.display = 'none';
       floatingTooltipElement.style.visibility = 'hidden';
     }
