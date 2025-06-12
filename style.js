@@ -598,6 +598,7 @@ function addMainTableListeners() {
       if (input.type === 'number') {
           value = parseFloat(value) || 0;
       }
+      console.log(`Input changed: Type=${type}, ID=${id}, Field=${field}, Value=${value}`);
 
       if (type === 'category') {
         // Find the category in the local `categories` array and update it directly
@@ -717,6 +718,7 @@ saveBtn.onclick = async function() {
       console.error("Error inserting new category:", error);
       // Handle error, maybe revert changes for this category
     } else if (data && data[0]) {
+      console.log("New category inserted successfully:", data[0]);
       // Update local baskets' category_id if they were linked to the temp ID
       baskets.forEach(b => {
         if (b.category_id === cat.id) b.category_id = data[0].id; // Assign new DB ID
@@ -732,18 +734,24 @@ saveBtn.onclick = async function() {
     if (error) {
         console.error("Error inserting new basket:", error);
         // Handle error
+    } else {
+        console.log("New basket inserted successfully.");
     }
   }
   // Delete categories
   for (const id of changes.deletedCategories) {
     if (!id.toString().startsWith('new-')) { // Only delete from DB if it's not a newly added row
-      await window.supabaseClient.from('credit_categories').delete().eq('id', id);
+      const { error } = await window.supabaseClient.from('credit_categories').delete().eq('id', id);
+      if (error) console.error("Error deleting category:", error);
+      else console.log("Category deleted successfully:", id);
     }
   }
   // Delete baskets
   for (const id of changes.deletedBaskets) {
     if (!id.toString().startsWith('new-')) { // Only delete from DB if it's not a newly added row
-      await window.supabaseClient.from('credit_baskets').delete().eq('id', id);
+      const { error } = await window.supabaseClient.from('credit_baskets').delete().eq('id', id);
+      if (error) console.error("Error deleting basket:", error);
+      else console.log("Basket deleted successfully:", id);
     }
   }
 
