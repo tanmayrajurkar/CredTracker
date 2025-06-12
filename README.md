@@ -1,91 +1,99 @@
-# CredTracker
+# CREDTRACKER
 
+CREDTRACKER is a modern web application designed to help students track and manage their academic credits efficiently. With a beautiful user interface and powerful features, it makes academic planning and progress tracking a breeze.
 
-This is a modern, interactive web application designed to help users efficiently track their academic credits, categorize them, and monitor their progress towards program completion. Built with a focus on user experience and data persistence, this tool provides a clear overview of earned and remaining credits, ensuring users stay on track with their academic goals.
+## Features
 
-### Key Features:
+- **Interactive 3D Visualization**: Engaging 3D model with interactive controls and particle effects
+- **Credit Tracking**: Easily track earned credits across different categories and requirements
+- **Progress Monitoring**: Visualize your progress towards degree completion with real-time updates
+- **Category Management**: Organize credits into categories and subcategories
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **User Authentication**: Secure login and signup system
+- **Profile Management**: Customize your profile and track your academic goals
 
-*   **Interactive Credit Distribution Table**: A dynamic and editable table that displays credit categories (e.g., University Core, Program Elective, University Elective) and their corresponding credit values.
-*   **Expandable Detailed Views**: Each main credit category can be expanded to reveal a detailed sub-table, allowing users to input and manage individual credit baskets within that category.
-*   **Real-time Calculations**: Automatically calculates and displays the total credits, with visual feedback if the total does not match the user's target credits to complete.
-*   **User Authentication**: Secure login, signup, and password reset functionalities powered by Supabase, ensuring individual user data privacy.
-*   **Personalized Data Management**: Credit baskets are user-specific, allowing each user to manage their unique credit data, while main credit categories can be shared globally.
-*   **Onboarding Flow**: A guided initial setup for new users to enter their name and total credits to complete, personalizing their tracking experience.
-*   **Profile Management**: Users can view and edit their profile details, including their name and total credits goal, and change their password.
-*   **Responsive Design**: The user interface is optimized for various screen sizes, providing a seamless experience on desktops, tablets, and mobile devices.
-*   **Secure Environment Variable Handling**: Supabase API keys are securely managed using environment variables, preventing sensitive data from being hardcoded or committed to version control.
+## Tech Stack
 
-### Technologies Used:
+- **Frontend**: HTML5, CSS3, JavaScript
+- **3D Graphics**: Three.js for interactive 3D visualizations
+- **Backend**: Python with Flask
+- **Database**: Supabase for data storage and authentication
+- **Styling**: Custom CSS with modern design principles
 
-*   **Frontend**: HTML5, CSS3, JavaScript
-*   **Backend as a Service (BaaS)**: Supabase (for database, authentication, and real-time capabilities)
-*   **Local Development Server**: Node.js with Express and Dotenv (for serving static files and environment variables)
+## Getting Started
 
-## Local Development
+### Prerequisites
 
-1. Install dependencies:
-```bash
-npm install
-```
+- Python 3.x
+- pip (Python package manager)
+- Modern web browser
 
-2. Start the development server:
-```bash
-npm run dev
-```
+### Installation
 
-## Deployment to Netlify
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/credtracker.git
+   cd credtracker
+   ```
 
-1. Push your code to a Git repository (GitHub, GitLab, or Bitbucket)
+2. Create and activate a virtual environment:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+   ```
 
-2. Log in to Netlify and click "New site from Git"
+3. Install required packages:
+   ```bash
+   pip install flask
+   ```
 
-3. Choose your repository and configure the build settings:
-   - Build command: `npm run build`
-   - Publish directory: `public`
+4. Run the application:
+   ```bash
+   python app.py
+   ```
 
-4. Add the following environment variables in Netlify's site settings:
-   - `SUPABASE_URL`: Your Supabase project URL
-   - `SUPABASE_KEY`: Your Supabase project API key
+5. Open your browser and navigate to:
+   ```
+   http://localhost:5000
+   ```
 
-5. Deploy!
+## Usage
 
-## Environment Variables
+1. **Sign Up/Login**: Create an account or log in to access your dashboard
+2. **Set Up Profile**: Enter your name and total credits required for your program
+3. **Add Categories**: Create categories for different types of credits
+4. **Track Progress**: Add your earned credits and monitor your progress
+5. **View Details**: Click on categories to see detailed information
 
-The following environment variables are required:
+## Features in Detail
 
-- `SUPABASE_URL`: Your Supabase project URL
-- `SUPABASE_KEY`: Your Supabase project API key
+### Interactive 3D Model
+- Rotate, zoom, and pan the 3D visualization
+- Particle effects that respond to mouse movement
+- Smooth animations and transitions
 
-## Project Structure
+### Credit Management
+- Add, edit, and delete credit categories
+- Track credits in real-time
+- Automatic total calculation
+- Visual progress indicators
 
-- `public/`: Contains all static files for production
-- `index.html`: Main HTML file
-- `styles.css`: Main stylesheet
-- `style.js`: Main JavaScript file
-- `config.js`: Configuration file for environment variables
+### User Interface
+- Clean, modern design
+- Responsive layout for all devices
+- Intuitive navigation
+- Smooth transitions and animations
 
+## Contributing
 
-### Setup and Running the Project:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-1.  **Clone the Repository**:
-    ```bash
-    git clone [YOUR_REPOSITORY_URL]
-    cd [YOUR_PROJECT_DIRECTORY]
-    ```
-2.  **Environment Variables**:
-    Create a `.env` file in the root of your project and add your Supabase credentials:
-    ```
-    SUPABASE_URL=YOUR_SUPABASE_URL
-    SUPABASE_KEY=YOUR_SUPABASE_ANON_KEY
-    ```
-    (Remember to add `.env` to your `.gitignore` file to prevent it from being committed.)
-3.  **Install Dependencies**:
-    ```bash
-    npm install
-    ```
-4.  **Start the Development Server**:
-    ```bash
-    npm start
-    ```
-5.  **Access the Application**:
-    Open your web browser and navigate to `http://localhost:3000`. 
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Three.js for 3D graphics capabilities
+- Flask for the backend framework
+- Supabase for database and authentication services 

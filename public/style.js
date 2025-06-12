@@ -502,21 +502,43 @@ function ensureStringIds(arr) {
 
 async function fetchData() {
   console.log("Fetching categories...");
-  const { data: catData, error: catError } = await window.supabaseClient.from('credit_categories').select('*').order('sl_no');
-  if (catError) console.error("Error fetching categories:", catError);
+  // Fetch categories for the current user
+  const { data: catData, error: catError } = await window.supabaseClient
+    .from('credit_categories')
+    .select('*')
+    .eq('user_id', window.currentUser.id)
+    .order('sl_no');
+  
+  if (catError) {
+    console.error("Error fetching categories:", catError);
+    throw new Error(`Failed to fetch categories: ${catError.message}`);
+  }
+  
   categories = ensureStringIds(catData || []);
   console.log("Fetched categories:", categories);
 
+  // Fetch baskets for the current user
   let baskData = [];
   if (window.currentUser) {
     console.log("Fetching user-specific baskets for user:", window.currentUser.id);
-    const { data: userBaskData, error: baskError } = await window.supabaseClient.from('credit_baskets').select('*').eq('user_id', window.currentUser.id);
-    if (baskError) console.error("Error fetching baskets:", baskError);
+    const { data: userBaskData, error: baskError } = await window.supabaseClient
+      .from('credit_baskets')
+      .select('*')
+      .eq('user_id', window.currentUser.id);
+    
+    if (baskError) {
+      console.error("Error fetching baskets:", baskError);
+      throw new Error(`Failed to fetch baskets: ${baskError.message}`);
+    }
+    
     baskData = ensureStringIds(userBaskData || []);
   }
   baskets = baskData;
   console.log("Fetched baskets:", baskets);
 
+  // Clear any existing changes
+  changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] };
+  
   renderMainTable();
 }
 
@@ -808,19 +830,75 @@ function addMainTableListeners(scope = document) {
       const id = String(btn.getAttribute('data-id')); // Ensure ID is string
 
       if (confirm(`Are you sure you want to delete this ${type}?`)) {
-        if (type === 'category') {
-          changes.deletedCategories.push(id);
-          categories = categories.filter(cat => cat.id !== id);
-          baskets = baskets.filter(basket => basket.category_id !== id);
-        } else if (type === 'basket') {
-          changes.deletedBaskets.push(id);
-          baskets = baskets.filter(basket => basket.id !== id);
+        try {
+          if (type === 'category') {
+            // First delete all baskets associated with this category
+            const { error: basketError } = await window.supabaseClient
+              .from('credit_baskets')
+              .delete()
+              .eq('category_id', id)
+              .eq('user_id', window.currentUser.id);
+            
+            if (basketError) {
+              throw new Error(`Failed to delete baskets for category ${id}: ${basketError.message}`);
+            }
+
+            // Then delete the category
+            const { error: categoryError } = await window.supabaseClient
+              .from('credit_categories')
+              .delete()
+              .eq('id', id)
+              .eq('user_id', window.currentUser.id);
+
+            if (categoryError) {
+              throw new Error(`Failed to delete category ${id}: ${categoryError.message}`);
+            }
+
+            // Update frontend state
+            categories = categories.filter(cat => cat.id !== id);
+            baskets = baskets.filter(basket => basket.category_id !== id);
+          } else if (type === 'basket') {
+            const { error } = await window.supabaseClient
+              .from('credit_baskets')
+              .delete()
+              .eq('id', id)
+              .eq('user_id', window.currentUser.id);
+
+            if (error) {
+              throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+            }
+
+            // Update frontend state
+            baskets = baskets.filter(basket => basket.id !== id);
+          }
+
+          // Re-render the table
+          renderMainTable();
+          showToast(`Selected ${type} deleted successfully!`, 'success');
+        } catch (error) {
+          console.error('Error deleting:', error);
+          showToast(`Failed to delete ${type}: ${error.message}`, 'error');
         }
-        renderMainTable(); // Re-render table after deletion
-        showToast(`Selected ${type} deleted!`, 'success');
       }
     };
   });
+
+  // Add category button click listener
+  const addCategoryBtn = scope.querySelector('#add-category-btn');
+  if (addCategoryBtn) {
+    addCategoryBtn.onclick = function() {
+      const newCat = {
+        id: 'new-' + Date.now(),
+        sl_no: categories.length + 1,
+        category: '',
+        total_credits: '',
+        earned_credits: ''
+      };
+      categories.push(newCat);
+      changes.newCategories.push(newCat);
+      renderMainTable();
+    };
+  }
 }
 
 function showToast(message, type) {
@@ -917,25 +995,58 @@ saveBtn.onclick = async function() {
     // Delete categories
     for (const id of changes.deletedCategories) {
       if (!id.toString().startsWith('new-')) {
-        const { error } = await window.supabaseClient.from('credit_categories').delete().eq('id', id);
-        if (error) throw new Error(`Failed to delete category ${id}: ${error.message}`);
+        try {
+          // First delete all baskets associated with this category
+          const { error: basketError } = await window.supabaseClient
+            .from('credit_baskets')
+            .delete()
+            .eq('category_id', id)
+            .eq('user_id', window.currentUser.id);
+          
+          if (basketError) {
+            throw new Error(`Failed to delete baskets for category ${id}: ${basketError.message}`);
+          }
+
+          // Then delete the category
+          const { error: categoryError } = await window.supabaseClient
+            .from('credit_categories')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', window.currentUser.id);
+          
+          if (categoryError) {
+            throw new Error(`Failed to delete category ${id}: ${categoryError.message}`);
+          }
+        } catch (error) {
+          console.error('Error during deletion:', error);
+          throw error;
+        }
       }
     }
 
     // Delete baskets
     for (const id of changes.deletedBaskets) {
       if (!id.toString().startsWith('new-')) {
-        const { error } = await window.supabaseClient.from('credit_baskets').delete().eq('id', id);
-        if (error) throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+        const { error } = await window.supabaseClient
+          .from('credit_baskets')
+          .delete()
+          .eq('id', id)
+          .eq('user_id', window.currentUser.id);
+        
+        if (error) {
+          throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+        }
       }
     }
 
     // Reset changes and reload
     changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] };
+    
+    // Fetch fresh data from the database
     await fetchData();
     
     saveBtn.textContent = 'Save';
-    alert('Changes saved successfully!');
+    showToast('Changes saved successfully!', 'success');
   } catch (error) {
     console.error('Save error:', error);
     alert(`Failed to save changes: ${error.message}`);
@@ -1160,3 +1271,236 @@ function setupGlobalTooltipListeners() {
     }
   }
 }
+
+// Auth tab switching
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    // Remove active class from all tabs
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    // Add active class to clicked tab
+    tab.classList.add('active');
+    
+    // Update button text and behavior based on active tab
+    const loginBtn = document.getElementById('login-btn');
+    const signupBtn = document.getElementById('signup-btn');
+    
+    if (tab.dataset.tab === 'login') {
+      loginBtn.textContent = 'Login';
+      signupBtn.textContent = 'Sign Up';
+      loginBtn.type = 'submit';
+      signupBtn.type = 'button';
+    } else {
+      loginBtn.textContent = 'Sign Up';
+      signupBtn.textContent = 'Login';
+      loginBtn.type = 'button';
+      signupBtn.type = 'submit';
+    }
+  });
+});
+
+// Function to show auth page and hide landing page
+function showAuth() {
+    window.history.pushState({ page: 'auth' }, '', '#auth');
+    authContainer.style.display = 'flex';
+    onboardingContainer.style.display = 'none';
+    appContainer.style.display = 'none';
+    document.getElementById('landing-container').style.display = 'none';
+}
+
+// Function to show landing page and hide auth page
+function showLanding() {
+    window.history.pushState({ page: 'landing' }, '', '#');
+    document.getElementById('landing-container').style.display = 'block';
+    authContainer.style.display = 'none';
+    onboardingContainer.style.display = 'none';
+    appContainer.style.display = 'none';
+}
+
+// Add smooth scrolling for navigation links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// Set current year in footer
+document.getElementById('current-year').textContent = new Date().getFullYear();
+
+// 3D Model Animation
+let scene, camera, renderer, controls;
+let particles, particleSystem;
+let isAnimating = true;
+
+function init3DModel() {
+    // Create scene
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf5f7fa);
+
+    // Create camera
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 15;
+
+    // Create renderer
+    const canvas = document.getElementById('hero-canvas');
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+
+    // Add orbit controls
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 5;
+    controls.maxDistance = 20;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // Create particle system
+    const particleCount = 2000;
+    const particleGeometry = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleSizes = new Float32Array(particleCount);
+
+    for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        particlePositions[i3] = (Math.random() - 0.5) * 30;
+        particlePositions[i3 + 1] = (Math.random() - 0.5) * 30;
+        particlePositions[i3 + 2] = (Math.random() - 0.5) * 30;
+        particleSizes[i] = Math.random() * 2;
+    }
+
+    particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+
+    const particleMaterial = new THREE.PointsMaterial({
+        color: 0x2176bd,
+        size: 0.1,
+        transparent: true,
+        opacity: 0.8,
+        sizeAttenuation: true
+    });
+
+    particleSystem = new THREE.Points(particleGeometry, particleMaterial);
+    scene.add(particleSystem);
+
+    // Create main geometry
+    const geometry = new THREE.TorusKnotGeometry(3, 1, 100, 16);
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x2176bd,
+        shininess: 100,
+        specular: 0x155a8a,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    const mainMesh = new THREE.Mesh(geometry, material);
+    scene.add(mainMesh);
+
+    // Add lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const pointLight1 = new THREE.PointLight(0xffffff, 1);
+    pointLight1.position.set(10, 10, 10);
+    scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0x2176bd, 1);
+    pointLight2.position.set(-10, -10, -10);
+    scene.add(pointLight2);
+
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize, false);
+
+    // Add mouse interaction
+    canvas.addEventListener('mousemove', onMouseMove);
+    canvas.addEventListener('mouseout', onMouseOut);
+
+    // Start animation
+    animate();
+}
+
+function onWindowResize() {
+    const canvas = document.getElementById('hero-canvas');
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+}
+
+function onMouseMove(event) {
+    const canvas = document.getElementById('hero-canvas');
+    const rect = canvas.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / canvas.clientWidth) * 2 - 1;
+    const y = -((event.clientY - rect.top) / canvas.clientHeight) * 2 + 1;
+
+    // Update particle system based on mouse position
+    const positions = particleSystem.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+        const distance = Math.sqrt(
+            Math.pow(positions[i] - x * 15, 2) +
+            Math.pow(positions[i + 1] - y * 15, 2)
+        );
+        if (distance < 5) {
+            positions[i + 2] += 0.1;
+        }
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+}
+
+function onMouseOut() {
+    // Reset particle positions
+    const positions = particleSystem.geometry.attributes.position.array;
+    for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 2] = (Math.random() - 0.5) * 30;
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+}
+
+function animate() {
+    if (!isAnimating) return;
+
+    requestAnimationFrame(animate);
+
+    // Update controls
+    controls.update();
+
+    // Rotate main mesh
+    const mainMesh = scene.children.find(child => child instanceof THREE.Mesh);
+    if (mainMesh) {
+        mainMesh.rotation.x += 0.005;
+        mainMesh.rotation.y += 0.005;
+    }
+
+    // Animate particles
+    const positions = particleSystem.geometry.attributes.position.array;
+    const time = Date.now() * 0.001;
+    for (let i = 0; i < positions.length; i += 3) {
+        positions[i] += Math.sin(time + positions[i]) * 0.01;
+        positions[i + 1] += Math.cos(time + positions[i + 1]) * 0.01;
+    }
+    particleSystem.geometry.attributes.position.needsUpdate = true;
+
+    renderer.render(scene, camera);
+}
+
+// Initialize 3D model when the page loads
+window.addEventListener('load', init3DModel);
+
+// Pause animation when tab is not visible
+document.addEventListener('visibilitychange', () => {
+    isAnimating = !document.hidden;
+    if (isAnimating) animate();
+});
+
+// Handle browser back button
+window.addEventListener('popstate', function(event) {
+    if (authContainer.style.display === 'flex') {
+        showLanding();
+    }
+});
