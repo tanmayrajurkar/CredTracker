@@ -1,35 +1,23 @@
-// Initialize Supabase client
-const supabaseUrl = window.config.SUPABASE_URL;
-const supabaseKey = window.config.SUPABASE_KEY;
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-window.supabaseClient = supabase;
-
-// Set up auth state change listener
-supabase.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-    window.currentUser = session.user;
-    await loadUserProfile();
-    if (userProfile && userProfile.onboarding_complete) {
-      showAppView();
-    } else {
-      showOnboardingView();
-    }
-  } else if (event === 'SIGNED_OUT') {
-    window.currentUser = null;
-    userProfile = null;
-    showAuthView();
-  }
-});
-
-// Check session on page load
-document.addEventListener('DOMContentLoaded', async () => {
-  await checkSession();
-});
-
+// Remove duplicate Supabase initialization
 let categories = []
 let baskets = []
 let changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] }
 let userProfile = null;
+
+// Listen for auth state changes
+window.addEventListener('authStateChanged', async (event) => {
+    const { event: authEvent, session, userProfile: profile } = event.detail;
+    
+    if (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED') {
+        if (profile && profile.onboarding_complete) {
+            showAppView();
+        } else {
+            showOnboardingView();
+        }
+    } else if (authEvent === 'SIGNED_OUT') {
+        showAuthView();
+    }
+});
 
 const mainTableContainer = document.getElementById('main-table-container')
 const saveBtn = document.getElementById('save-btn')
@@ -143,56 +131,47 @@ if (infoIcon && floatingTooltip) {
 }
 
 loginBtn.onclick = async () => {
-  loginBtn.disabled = signupBtn.disabled = true;
-  authMessage.textContent = '';
-  const { error } = await window.supabaseClient.auth.signInWithPassword({
-    email: emailInput.value,
-    password: passwordInput.value
-  });
-  if (error) {
-    authMessage.textContent = error.message;
-  } else {
-    await checkSession();
-  }
-  loginBtn.disabled = signupBtn.disabled = false;
+    loginBtn.disabled = signupBtn.disabled = true;
+    authMessage.textContent = '';
+    try {
+        const { error } = await window.supabaseClient.auth.signInWithPassword({
+            email: emailInput.value,
+            password: passwordInput.value
+        });
+        if (error) {
+            authMessage.textContent = error.message;
+        }
+    } catch (err) {
+        authMessage.textContent = 'An error occurred during login. Please try again.';
+        console.error('Login error:', err);
+    } finally {
+        loginBtn.disabled = signupBtn.disabled = false;
+    }
 };
 
 signupBtn.onclick = async () => {
-  loginBtn.disabled = signupBtn.disabled = true;
-  authMessage.textContent = '';
-  const { data, error } = await window.supabaseClient.auth.signUp({
-    email: emailInput.value,
-    password: passwordInput.value
-  });
-  if (error) {
-    authMessage.textContent = error.message;
-  } else {
-    authMessage.textContent = 'Check your email for a confirmation link!';
-    if (data && data.user) {
-      await createOrUpdateUserProfile(data.user.id, { onboarding_complete: false, name: '' });
-      await checkSession();
+    loginBtn.disabled = signupBtn.disabled = true;
+    authMessage.textContent = '';
+    try {
+        const { data, error } = await window.supabaseClient.auth.signUp({
+            email: emailInput.value,
+            password: passwordInput.value
+        });
+        if (error) {
+            authMessage.textContent = error.message;
+        } else {
+            authMessage.textContent = 'Check your email for a confirmation link!';
+            if (data && data.user) {
+                await createOrUpdateUserProfile(data.user.id, { onboarding_complete: false, name: '' });
+            }
+        }
+    } catch (err) {
+        authMessage.textContent = 'An error occurred during signup. Please try again.';
+        console.error('Signup error:', err);
+    } finally {
+        loginBtn.disabled = signupBtn.disabled = false;
     }
-  }
-  loginBtn.disabled = signupBtn.disabled = false;
 };
-
-async function checkSession() {
-  const { data: { session } } = await window.supabaseClient.auth.getSession();
-  if (session) {
-    window.currentUser = session.user;
-    await loadUserProfile();
-
-    if (userProfile && userProfile.onboarding_complete) {
-      showAppView();
-    } else {
-      showOnboardingView();
-    }
-  } else {
-    window.currentUser = null;
-    userProfile = null;
-    showAuthView();
-  }
-}
 
 // View Management Functions
 function showAuthView() {
@@ -293,7 +272,6 @@ async function createOrUpdateUserProfile(userId, data) {
 if (logoutBtn) {
   logoutBtn.onclick = async () => {
     await window.supabaseClient.auth.signOut();
-    await checkSession();
   };
 }
 

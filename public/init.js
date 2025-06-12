@@ -7,8 +7,37 @@ try {
         throw new Error('Supabase configuration is missing');
     }
     
-    window.supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    // Create and expose the Supabase client
+    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+    window.supabaseClient = supabaseClient;
+    
+    // Set up auth state change listener
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            window.currentUser = session.user;
+            // Dispatch a custom event that style.js can listen to
+            window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                detail: { event, session, userProfile: window.userProfile }
+            }));
+        } else if (event === 'SIGNED_OUT') {
+            window.currentUser = null;
+            window.userProfile = null;
+            window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                detail: { event, session: null, userProfile: null }
+            }));
+        }
+    });
+
+    // Check initial session
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+            window.currentUser = session.user;
+            window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                detail: { event: 'SIGNED_IN', session, userProfile: window.userProfile }
+            }));
+        }
+    });
 } catch (error) {
-    // Handle initialization error silently
+    console.error('Failed to initialize Supabase client:', error);
     window.supabaseClient = null;
 } 
