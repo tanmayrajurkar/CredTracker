@@ -3,6 +3,28 @@ let categories = []
 let baskets = []
 let changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] }
 let userProfile = null;
+let openDetailRows = new Set(); // Store IDs of categories with open detail rows
+
+// Function to save current input values within a given scope
+function saveInputStates(scope = document) {
+  const inputStates = new Map(); // Using a Map for compound keys
+  scope.querySelectorAll('.editable-input').forEach(input => {
+    // Create a unique key for each input based on its data attributes
+    const key = `${input.dataset.type}-${input.dataset.id}-${input.dataset.field}`;
+    inputStates.set(key, input.value);
+  });
+  return inputStates;
+}
+
+// Function to restore input values within a given scope
+function restoreInputStates(inputStates, scope = document) {
+  scope.querySelectorAll('.editable-input').forEach(input => {
+    const key = `${input.dataset.type}-${input.dataset.id}-${input.dataset.field}`;
+    if (inputStates.has(key)) {
+      input.value = inputStates.get(key);
+    }
+  });
+}
 
 // Listen for auth state changes
 window.addEventListener('authStateChanged', async (event) => {
@@ -97,16 +119,21 @@ function showTooltip(infoIconElement, floatingTooltipElement) {
 
   // Get dimensions and position it
   const rect = infoIconElement.getBoundingClientRect();
-  const scrollY = window.scrollY || window.pageYOffset;
-  const scrollX = window.scrollX || window.pageXOffset;
-  const tooltipWidth = floatingTooltipElement.offsetWidth;
-  const tooltipHeight = floatingTooltipElement.offsetHeight;
 
-  floatingTooltipElement.style.left = (rect.left + rect.width / 2 + scrollX - tooltipWidth / 2) + 'px';
-  floatingTooltipElement.style.top = (rect.top + scrollY - tooltipHeight - 12) + 'px';
+  // Ensure it's displayed as block for offsetWidth/offsetHeight to work
+  floatingTooltipElement.style.display = 'block'; 
+  floatingTooltipElement.style.visibility = 'hidden'; // Hide temporarily for measurement
 
-  // Make it visible with the transition
-  floatingTooltipElement.classList.add('visible');
+  // Wait for a frame to ensure reflow after display block
+  requestAnimationFrame(() => {
+    const tooltipWidth = floatingTooltipElement.offsetWidth;
+    const tooltipHeight = floatingTooltipElement.offsetHeight;
+
+    floatingTooltipElement.style.left = (rect.left + rect.width / 2 - tooltipWidth / 2) + 'px';
+    floatingTooltipElement.style.top = (rect.top - tooltipHeight - 12) + 'px'; // 12px margin
+    floatingTooltipElement.classList.add('visible');
+    floatingTooltipElement.style.visibility = 'visible'; // Finally make visible
+  });
 }
 
 function hideTooltip(floatingTooltipElement) {
@@ -117,7 +144,7 @@ function hideTooltip(floatingTooltipElement) {
 // Renamed this function to be more explicit about its purpose
 function setupGlobalTooltipListeners() {
   // Query elements inside this function to ensure they are current after DOM updates
-  const infoIcon = document.getElementById('test-tooltip-trigger');
+  const infoIcon = document.getElementById('total-tooltip-trigger');
   const floatingTooltip = document.getElementById('floating-tooltip');
 
   if (infoIcon && floatingTooltip) {
@@ -449,21 +476,35 @@ onboardingConfirmBtn.onclick = async () => {
   };
   const success = await createOrUpdateUserProfile(window.currentUser.id, updatedData);
 
-  onboardingConfirmBtn.disabled = false;
   if (success) {
-    await checkSession();
+    // Create default categories for the new user
+    const categoriesCreated = await createDefaultCategories(window.currentUser.id);
+    if (categoriesCreated) {
+      await checkSession();
+    } else {
+      alert("Failed to create default categories. Please try again.");
+    }
   } else {
     alert("Failed to complete onboarding. Please try again.");
   }
+  onboardingConfirmBtn.disabled = false;
 };
 
-// Initial setup and data fetching
-// This will be called after checkSession determines the view
+// Add a helper to ensure all IDs are strings
+function ensureStringIds(arr) {
+  return arr.map(item => {
+    const newItem = { ...item };
+    if (newItem.id !== undefined) newItem.id = String(newItem.id);
+    if (newItem.category_id !== undefined) newItem.category_id = String(newItem.category_id);
+    return newItem;
+  });
+}
+
 async function fetchData() {
   console.log("Fetching categories...");
   const { data: catData, error: catError } = await window.supabaseClient.from('credit_categories').select('*').order('sl_no');
   if (catError) console.error("Error fetching categories:", catError);
-  categories = catData || [];
+  categories = ensureStringIds(catData || []);
   console.log("Fetched categories:", categories);
 
   let baskData = [];
@@ -471,7 +512,7 @@ async function fetchData() {
     console.log("Fetching user-specific baskets for user:", window.currentUser.id);
     const { data: userBaskData, error: baskError } = await window.supabaseClient.from('credit_baskets').select('*').eq('user_id', window.currentUser.id);
     if (baskError) console.error("Error fetching baskets:", baskError);
-    baskData = userBaskData || [];
+    baskData = ensureStringIds(userBaskData || []);
   }
   baskets = baskData;
   console.log("Fetched baskets:", baskets);
@@ -480,7 +521,11 @@ async function fetchData() {
 }
 
 // Render Main Table Function (existing, ensure it creates the elements dynamically)
-function renderMainTable() {
+function renderMainTable(initialOpenStates = null) {
+  const currentInputStates = saveInputStates(); // Save input states before clearing
+  const statesToUseForRendering = initialOpenStates ? initialOpenStates : new Set(openDetailRows); // Use passed states or global snapshot
+  console.log('Inside renderMainTable, statesToUseForRendering:', Array.from(statesToUseForRendering));
+
   mainTableContainer.innerHTML = '';
   const table = document.createElement('table');
   table.className = 'credits-table';
@@ -501,21 +546,28 @@ function renderMainTable() {
 
   // Render category rows
   categories.forEach((cat) => {
+    // Calculate earned credits for this category
+    const categoryEarnedCredits = baskets
+      .filter(b => b.category_id === cat.id)
+      .reduce((sum, basket) => sum + (parseFloat(basket.earned_credits) || 0), 0);
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input class="editable-input" type="number" value="${cat.sl_no ?? ''}" data-type="category" data-id="${cat.id}" data-field="sl_no"></td>
       <td><input class="editable-input" type="text" value="${cat.category ?? ''}" data-type="category" data-id="${cat.id}" data-field="category"></td>
       <td><input class="editable-input" type="number" value="${cat.total_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="total_credits"></td>
-      <td><input class="editable-input" type="number" autocomplete="one-time-code" inputmode="numeric" value="${cat.earned_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="earned_credits"></td>
-      <td><button class="view-btn" data-toggle="${cat.id}">+</button></td>
+      <td style="font-weight:600;">${categoryEarnedCredits}</td>
+      <td><button class="view-btn" data-toggle="${cat.id}">${statesToUseForRendering.has(String(cat.id)) ? '-' : '+'}</button></td>
       <td><button class="delete-row-btn" data-delete="category" data-id="${cat.id}">Delete</button></td>
     `;
     tbody.appendChild(tr);
 
     // Details row
     const detailsTr = document.createElement('tr');
-    detailsTr.style.display = 'none';
     detailsTr.id = `details-row-${cat.id}`;
+    const shouldBeOpen = statesToUseForRendering.has(String(cat.id));
+    console.log(`Category ID: ${cat.id}, Should be open: ${shouldBeOpen}`);
+    detailsTr.style.display = shouldBeOpen ? '' : 'none';
     const detailsTd = document.createElement('td');
     detailsTd.colSpan = 6;
     detailsTd.innerHTML = renderDetailsTable(cat.id);
@@ -525,7 +577,7 @@ function renderMainTable() {
 
   // Calculate and add total row
   const totalCreditsSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.total_credits) || 0), 0);
-  const totalEarnedSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.earned_credits) || 0), 0);
+  const totalEarnedSum = baskets.reduce((sum, basket) => sum + (parseFloat(basket.earned_credits) || 0), 0);
 
   const userTotalCreditsToComplete = userProfile ? (userProfile.total_credits_to_complete || 0) : 0;
   const isMismatch = totalCreditsSum !== Number(userTotalCreditsToComplete);
@@ -534,13 +586,21 @@ function renderMainTable() {
   totalTr.innerHTML = `
     <td colspan="2" style="font-weight:600;">Total Credits</td>
     <td class="total-credits-cell${isMismatch ? ' mismatch' : ''}">
-      ${totalCreditsSum}
-      ${isMismatch ? `<span class="info-icon" tabindex="0" id="test-tooltip-trigger">i</span>` : ''}
+      ${totalCreditsSum} ${isMismatch ? `<div class="info-icon" tabindex="0" id="total-tooltip-trigger">i</div>` : ''}
     </td>
-    <td style="font-weight:600;">${totalEarnedSum}</td>
     <td colspan="2" style="font-weight:600;">To Complete: ${userTotalCreditsToComplete}</td>
   `;
+
+  // Add earned credits row
+  const earnedTr = document.createElement('tr');
+  earnedTr.innerHTML = `
+    <td colspan="2" style="font-weight:600;">Total Earned Credits</td>
+    <td style="font-weight:600;">${totalEarnedSum}</td>
+    <td colspan="2" style="font-weight:600;">Remaining: ${userTotalCreditsToComplete - totalEarnedSum}</td>
+  `;
+
   tbody.appendChild(totalTr);
+  tbody.appendChild(earnedTr);
 
   // Add category button row
   const addCatTr = document.createElement('tr');
@@ -549,16 +609,21 @@ function renderMainTable() {
 
   mainTableContainer.appendChild(table);
 
-  // Add event listeners after table is in DOM
-  addMainTableListeners();
-  setupGlobalTooltipListeners();
+  // Defer restoring states and attaching listeners
+  requestAnimationFrame(() => {
+    restoreInputStates(currentInputStates);
+    addMainTableListeners();
+    setupGlobalTooltipListeners();
+  });
 }
 
 // Render Details Table Function (existing)
 function renderDetailsTable(categoryId) {
-  const cat = categories.find(c => c.id === categoryId)
-  let heading = cat ? `${cat.category} Credits Distribution` : 'Credits Distribution'
-  const catBaskets = baskets.filter(b => b.category_id === categoryId)
+  // categoryId passed here can be a number or string depending on source
+  const catIdString = String(categoryId);
+  const cat = categories.find(c => c.id === catIdString); // c.id is now guaranteed string
+  let heading = cat ? `${cat.category} Credits Distribution` : 'Credits Distribution';
+  const catBaskets = baskets.filter(b => b.category_id === catIdString); // b.category_id is now guaranteed string
   let html = `<div class="details-container">
     <h2 class="details-heading">${heading}</h2>
     <table class="details-table">
@@ -572,142 +637,190 @@ function renderDetailsTable(categoryId) {
         </tr>
       </thead>
       <tbody>
-  `
+  `;
   catBaskets.forEach(basket => {
+    // Calculate remaining credits directly
+    const calculatedRemaining = (parseFloat(basket.min_credits) || 0) - (parseFloat(basket.earned_credits) || 0);
     html += `<tr>
       <td><input class="editable-input" type="text" value="${basket.basket_name ?? ''}" data-type="basket" data-id="${basket.id}" data-field="basket_name"></td>
       <td><input class="editable-input" type="number" value="${basket.min_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="min_credits"></td>
       <td><input class="editable-input" type="number" autocomplete="one-time-code" inputmode="numeric" value="${basket.earned_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="earned_credits"></td>
-      <td><input class="editable-input" type="number" value="${basket.remaining_credits ?? ''}" data-type="basket" data-id="${basket.id}" data-field="remaining_credits"></td>
+      <td><span style="font-weight: bold;">${calculatedRemaining}</span></td>
       <td><button class="delete-row-btn" data-delete="basket" data-id="${basket.id}">Delete</button></td>
-    </tr>`
-  })
-  html += `<tr><td colspan="5"><button class="add-row-btn" data-add-basket="${categoryId}">+ Add Basket</button></td></tr>`
-  html += '</tbody></table></div>'
-  return html
+    </tr>`;
+  });
+  html += `<tr><td colspan="5"><button class="add-row-btn" data-add-basket="${catIdString}">+ Add Basket</button></td></tr>`; // Pass string ID
+  html += '</tbody></table></div>';
+  return html;
 }
 
-function addMainTableListeners() {
+function addMainTableListeners(scope = document) {
   // Toggle details
-  document.querySelectorAll('.view-btn').forEach(btn => {
+  scope.querySelectorAll('.view-btn').forEach(btn => {
     btn.onclick = function() {
-      const catId = btn.getAttribute('data-toggle')
-      const detailsRow = document.getElementById(`details-row-${catId}`)
+      const catId = String(btn.getAttribute('data-toggle')); // Ensure string ID
+      const detailsRow = document.getElementById(`details-row-${catId}`);
       if (detailsRow.style.display === 'none') {
         detailsRow.style.display = '';
         btn.textContent = '-';
+        openDetailRows.add(catId);
       } else {
         detailsRow.style.display = 'none';
         btn.textContent = '+';
+        openDetailRows.delete(catId);
       }
-    }
-  })
+    };
+  });
+
   // Editable inputs
-  document.querySelectorAll('.editable-input').forEach(input => {
-    input.oninput = function() {
-      const type = input.dataset.type
-      const id = input.dataset.id
-      const field = input.dataset.field
+  scope.querySelectorAll('.editable-input').forEach(input => {
+    input.onchange = function() {
+      const type = input.dataset.type;
+      const id = String(input.dataset.id); // Ensure ID from dataset is string
+      const field = input.dataset.field;
       let value = input.value;
-      // Convert to number if field expects it
+      
       if (input.type === 'number') {
           value = parseFloat(value) || 0;
       }
 
       if (type === 'category') {
-        // Find the category in the local `categories` array and update it directly
-        const categoryToUpdate = categories.find(c => c.id == id);
+        const categoryToUpdate = categories.find(c => c.id === id); // c.id is now string, id is string
         if (categoryToUpdate) {
             categoryToUpdate[field] = value;
-            // Update remaining_credits for baskets only if earned_credits changes
-            if (field === 'earned_credits' || field === 'min_credits') {
-                const relatedBaskets = baskets.filter(b => b.category_id == id);
-                relatedBaskets.forEach(bask => {
-                    bask.remaining_credits = (parseFloat(bask.min_credits) || 0) - (parseFloat(bask.earned_credits) || 0);
-                    // Mark for update if this change needs to be saved
-                    if (!changes.baskets[bask.id]) changes.baskets[bask.id] = {};
-                    changes.baskets[bask.id].remaining_credits = bask.remaining_credits;
-                });
-            }
         }
-        if (!changes.categories[id]) changes.categories[id] = {}
-        changes.categories[id][field] = value
+        if (!changes.categories[id]) changes.categories[id] = {};
+        changes.categories[id][field] = value;
       } else if (type === 'basket') {
-        // Find the basket in the local `baskets` array and update it directly
-        const basketToUpdate = baskets.find(b => b.id == id);
+        const basketToUpdate = baskets.find(b => b.id === id); // b.id is now string, id is string
         if (basketToUpdate) {
             basketToUpdate[field] = value;
-            // Recalculate remaining_credits if min_credits or earned_credits change
             if (field === 'min_credits' || field === 'earned_credits') {
                 basketToUpdate.remaining_credits = (parseFloat(basketToUpdate.min_credits) || 0) - (parseFloat(basketToUpdate.earned_credits) || 0);
-                // Ensure remaining_credits is also marked for update if it's not already
                 if (!changes.baskets[id]) changes.baskets[id] = {};
                 changes.baskets[id].remaining_credits = basketToUpdate.remaining_credits;
             }
         }
-        if (!changes.baskets[id]) changes.baskets[id] = {}
-        changes.baskets[id][field] = value
+        if (!changes.baskets[id]) changes.baskets[id] = {};
+        changes.baskets[id][field] = value;
       }
-      renderMainTable(); // Re-render to reflect live updates for totals
-    }
-  })
-  // Add category
-  document.getElementById('add-category-btn').onclick = function() {
-    const newCat = {
-      id: 'new-' + Date.now(),
-      sl_no: categories.length + 1,
-      category: '',
-      total_credits: '',
-      earned_credits: ''
-    }
-    categories.push(newCat)
-    changes.newCategories.push(newCat)
-    renderMainTable()
-  }
-  // Add basket
-  document.querySelectorAll('[data-add-basket]').forEach(btn => {
+      
+      logChanges();
+      
+      // Save current open states before any re-render
+      const currentOpenStatesSnapshot = new Set(openDetailRows);
+      console.log('Before renderMainTable, currentOpenStatesSnapshot:', Array.from(currentOpenStatesSnapshot));
+      
+      if (type === 'category' || (type === 'basket' && field === 'earned_credits')) {
+        const activeElement = document.activeElement;
+        let focusedInputInfo = null;
+        if (activeElement && activeElement.matches('.editable-input')) {
+          focusedInputInfo = {
+            id: String(activeElement.dataset.id), // Ensure ID is string here too
+            type: activeElement.dataset.type,
+            field: activeElement.dataset.field,
+            selectionStart: activeElement.selectionStart,
+            selectionEnd: activeElement.selectionEnd
+          };
+        }
+
+        renderMainTable(currentOpenStatesSnapshot); // Pass the snapshot to renderMainTable
+        
+        // Explicitly restore open states after re-render to ensure persistence
+        openDetailRows.clear(); // Clear the set
+        currentOpenStatesSnapshot.forEach(id => openDetailRows.add(id)); // Add back previous states
+        
+        if (focusedInputInfo) {
+          // Query selector needs string IDs
+          const newActiveInput = document.querySelector(`[data-id="${focusedInputInfo.id}"][data-type="${focusedInputInfo.type}"][data-field="${focusedInputInfo.field}"]`);
+          if (newActiveInput) {
+            newActiveInput.focus();
+            if (newActiveInput.type === 'text' || newActiveInput.type === 'number') {
+              newActiveInput.setSelectionRange(focusedInputInfo.selectionStart, focusedInputInfo.selectionEnd);
+            }
+          }
+        }
+      } else if (type === 'basket') {
+        const basket = baskets.find(b => b.id === id); // b.id is now string, id is string
+        if (basket) {
+          const categoryId = basket.category_id; // category_id is now guaranteed string
+          const detailsRow = document.getElementById(`details-row-${categoryId}`);
+          if (detailsRow) {
+            const detailsTd = detailsRow.querySelector('td');
+            if (detailsTd) {
+              const currentDetailInputStates = saveInputStates(detailsTd);
+              detailsTd.innerHTML = renderDetailsTable(categoryId); // categoryId passed is string
+              requestAnimationFrame(() => {
+                restoreInputStates(currentDetailInputStates, detailsTd);
+                addMainTableListeners(detailsTd);
+              });
+            }
+          }
+        }
+      }
+    };
+
+    input.onblur = function() {
+      const currentValue = this.value;
+      const originalValue = this.getAttribute('data-original-value');
+      if (currentValue !== originalValue) {
+        this.onchange();
+      }
+    };
+
+    input.onfocus = function() {
+      this.setAttribute('data-original-value', this.value);
+    };
+
+    input.onkeypress = function(e) {
+      if (e.key === 'Enter') {
+        this.onchange();
+        this.blur();
+      }
+    };
+  });
+
+  // Add basket button click listener
+  scope.querySelectorAll('[data-add-basket]').forEach(btn => {
     btn.onclick = function() {
-      const catId = btn.getAttribute('data-add-basket')
+      const catId = String(btn.getAttribute('data-add-basket')); // catId is already string from data-attribute
       const newBasket = {
-        id: 'new-' + Date.now(),
-        category_id: parseInt(catId),
+        id: 'new-' + Date.now(), // String ID
+        category_id: catId, // Directly assign as string
         basket_name: '',
         min_credits: '',
         earned_credits: '',
         remaining_credits: ''
-      }
-      baskets.push(newBasket)
-      changes.newBaskets.push(newBasket)
-      renderMainTable()
-      // Open the details row again
-      const detailsRow = document.getElementById(`details-row-${catId}`)
-      detailsRow.style.display = 'none'
-    }
-  })
-  // Delete row
-  document.querySelectorAll('.delete-row-btn').forEach(btn => {
+      };
+      baskets.push(newBasket);
+      changes.newBaskets.push(newBasket);
+      
+      openDetailRows.add(catId);
+      
+      renderMainTable();
+    };
+  });
+
+  // Delete row button click listener (can be scoped)
+  scope.querySelectorAll('.delete-row-btn').forEach(btn => {
     btn.onclick = async function() { // Made function async
-      const type = btn.getAttribute('data-delete')
-      const id = btn.getAttribute('data-id')
+      const type = btn.getAttribute('data-delete');
+      const id = String(btn.getAttribute('data-id')); // Ensure ID is string
 
       if (confirm(`Are you sure you want to delete this ${type}?`)) {
         if (type === 'category') {
-          // Mark for deletion instead of immediate removal from local array
           changes.deletedCategories.push(id);
-          // Remove from local categories and associated baskets
           categories = categories.filter(cat => cat.id !== id);
           baskets = baskets.filter(basket => basket.category_id !== id);
         } else if (type === 'basket') {
-          // Mark for deletion
           changes.deletedBaskets.push(id);
-          // Remove from local baskets array
           baskets = baskets.filter(basket => basket.id !== id);
         }
         renderMainTable(); // Re-render table after deletion
         showToast(`Selected ${type} deleted!`, 'success');
       }
-    }
-  })
+    };
+  });
 }
 
 function showToast(message, type) {
@@ -727,4 +840,323 @@ function showToast(message, type) {
       toast.remove();
     }, { once: true });
   }, 3000);
+}
+
+saveBtn.onclick = async function() {
+  console.log("Save button clicked.");
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving...';
+  
+  try {
+    // Filter out any newly added items that have also been marked for deletion
+    changes.newCategories = changes.newCategories.filter(nc => !changes.deletedCategories.includes(nc.id));
+    changes.newBaskets = changes.newBaskets.filter(nb => !changes.deletedBaskets.includes(nb.id));
+
+    // Update categories
+    for (const id in changes.categories) {
+      if (!id.toString().startsWith('new-') && !changes.deletedCategories.includes(id)) {
+        const updateData = { ...changes.categories[id] };
+        // Only include fields that exist in the table
+        const validFields = ['sl_no', 'category', 'total_credits', 'user_id'];
+        Object.keys(updateData).forEach(key => {
+          if (!validFields.includes(key)) {
+            delete updateData[key];
+          }
+        });
+        // Ensure user_id is set
+        updateData.user_id = window.currentUser ? window.currentUser.id : null;
+        const { error } = await window.supabaseClient.from('credit_categories').update(updateData).eq('id', id);
+        if (error) throw new Error(`Failed to update category ${id}: ${error.message}`);
+      }
+    }
+
+    // Update baskets
+    for (const id in changes.baskets) {
+      if (!id.toString().startsWith('new-') && !changes.deletedBaskets.includes(id)) {
+        const { error } = await window.supabaseClient.from('credit_baskets').update(changes.baskets[id]).eq('id', id);
+        if (error) throw new Error(`Failed to update basket ${id}: ${error.message}`);
+      }
+    }
+
+    // Insert new categories
+    for (const cat of changes.newCategories) {
+      const insertData = { ...cat };
+      delete insertData.id; // Remove temporary client-side ID
+      // Only include fields that exist in the table
+      const validFields = ['sl_no', 'category', 'total_credits', 'user_id'];
+      Object.keys(insertData).forEach(key => {
+        if (!validFields.includes(key)) {
+          delete insertData[key];
+        }
+      });
+      // Ensure user_id is set
+      insertData.user_id = window.currentUser ? window.currentUser.id : null;
+      const { data, error } = await window.supabaseClient.from('credit_categories').insert([insertData]).select();
+      if (error) throw new Error(`Failed to insert new category: ${error.message}`);
+      
+      if (data && data[0]) {
+        // Update local baskets' category_id if they were linked to the temp ID
+        baskets.forEach(b => {
+          if (b.category_id === cat.id) b.category_id = data[0].id;
+        });
+      }
+    }
+
+    // Insert new baskets
+    for (const bask of changes.newBaskets) {
+      const insertData = { 
+        ...bask, 
+        user_id: window.currentUser ? window.currentUser.id : null,
+        category_id: bask.category_id // Ensure category_id is included
+      };
+      delete insertData.id; // Remove temporary client-side ID
+      const { error } = await window.supabaseClient.from('credit_baskets').insert([insertData]);
+      if (error) throw new Error(`Failed to insert new basket: ${error.message}`);
+    }
+
+    // Delete categories
+    for (const id of changes.deletedCategories) {
+      if (!id.toString().startsWith('new-')) {
+        const { error } = await window.supabaseClient.from('credit_categories').delete().eq('id', id);
+        if (error) throw new Error(`Failed to delete category ${id}: ${error.message}`);
+      }
+    }
+
+    // Delete baskets
+    for (const id of changes.deletedBaskets) {
+      if (!id.toString().startsWith('new-')) {
+        const { error } = await window.supabaseClient.from('credit_baskets').delete().eq('id', id);
+        if (error) throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+      }
+    }
+
+    // Reset changes and reload
+    changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], deletedCategories: [], deletedBaskets: [] };
+    await fetchData();
+    
+    saveBtn.textContent = 'Save';
+    alert('Changes saved successfully!');
+  } catch (error) {
+    console.error('Save error:', error);
+    alert(`Failed to save changes: ${error.message}`);
+    saveBtn.textContent = 'Save Failed - Try Again';
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+// Add debug logging for changes
+function logChanges() {
+  console.log('Current changes:', {
+    categories: changes.categories,
+    baskets: changes.baskets,
+    newCategories: changes.newCategories,
+    newBaskets: changes.newBaskets,
+    deletedCategories: changes.deletedCategories,
+    deletedBaskets: changes.deletedBaskets
+  });
+}
+
+// Add a function to create default categories for new users
+async function createDefaultCategories(userId) {
+  const defaultCategories = [
+    { sl_no: 1, category: 'University Core', total_credits: 0, user_id: userId },
+    { sl_no: 2, category: 'Program Elective', total_credits: 0, user_id: userId },
+    { sl_no: 3, category: 'University Elective', total_credits: 0, user_id: userId }
+  ];
+
+  const { error } = await window.supabaseClient
+    .from('credit_categories')
+    .insert(defaultCategories);
+
+  if (error) {
+    console.error('Error creating default categories:', error);
+    return false;
+  }
+  return true;
+}
+
+// Add info sidebar button and container to the header
+document.querySelector('.header-actions').insertAdjacentHTML('beforeend', `
+  <button id="info-btn" class="header-icon-btn"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-help-circle"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+`);
+
+document.querySelector('#main-content-view').insertAdjacentHTML('beforeend', `
+  <div id="info-sidebar" class="info-sidebar" style="display: none;">
+    <div class="info-sidebar-content">
+      <button id="close-info-btn" class="close-info-btn">&times;</button>
+      <h2>How to Use CredTracker</h2>
+      
+      <section>
+        <h3>Getting Started</h3>
+        <p>Welcome to CredTracker! This tool helps you track your academic credits and progress.</p>
+        <ul>
+          <li>Each category represents a type of credit requirement (e.g., University Core, Program Elective)</li>
+          <li>Baskets within each category help you break down specific requirements</li>
+          <li>Track your earned credits and see your progress towards completion</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Managing Categories</h3>
+        <ul>
+          <li>Click "+ Add Category" to create a new credit category</li>
+          <li>Enter the total credits required for each category</li>
+          <li>Use the "View" button to see and manage baskets within a category</li>
+          <li>Click "Delete" to remove a category (this will also delete all its baskets)</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Managing Baskets</h3>
+        <ul>
+          <li>Click "+ Add Basket" within a category to create a new basket</li>
+          <li>Enter the minimum credits required for each basket</li>
+          <li>Update earned credits as you complete requirements</li>
+          <li>Remaining credits are automatically calculated</li>
+          <li>Click "Delete" to remove a basket</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Tracking Progress</h3>
+        <ul>
+          <li>Total credits show the sum of all category requirements</li>
+          <li>Earned credits show your progress across all baskets</li>
+          <li>The "i" icon indicates if your total credits match your program requirements</li>
+          <li>Remember to click "Save" after making changes</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Tips</h3>
+        <ul>
+          <li>Keep your earned credits up to date for accurate progress tracking</li>
+          <li>Use baskets to break down complex requirements into manageable parts</li>
+          <li>Check the remaining credits to know what's left to complete</li>
+          <li>You can edit any field by clicking on it</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+`);
+
+// Add floating tooltip container to the body to ensure it's always on top
+document.body.insertAdjacentHTML('beforeend', `
+  <div id="floating-tooltip" class="floating-tooltip"></div>
+`);
+
+// Add info sidebar styles
+// REMOVED INLINE STYLE BLOCK TO AVOID CSS CONFLICTS. ALL STYLES SHOULD BE IN styles.css
+
+// Add info sidebar functionality
+document.getElementById('info-btn').onclick = function() {
+  document.getElementById('info-sidebar').classList.add('visible');
+};
+
+document.getElementById('close-info-btn').onclick = function() {
+  document.getElementById('info-sidebar').classList.remove('visible');
+};
+
+// Close sidebar when clicking outside
+document.addEventListener('click', function(event) {
+  const sidebar = document.getElementById('info-sidebar');
+  const infoBtn = document.getElementById('info-btn');
+  if (!sidebar.contains(event.target) && !infoBtn.contains(event.target) && sidebar.classList.contains('visible')) {
+    sidebar.classList.remove('visible');
+  }
+});
+
+// Centralize tooltip functionality to avoid duplicates and ensure it's set up correctly.
+function setupGlobalTooltipListeners() {
+  // Query elements inside this function to ensure they are current after DOM updates
+  const infoIcon = document.getElementById('total-tooltip-trigger');
+  const floatingTooltip = document.getElementById('floating-tooltip');
+
+  // Remove previous listeners if they exist to prevent duplicates
+  if (infoIcon) {
+    infoIcon.removeEventListener('mouseenter', showTooltip);
+    infoIcon.removeEventListener('focus', showTooltip);
+    infoIcon.removeEventListener('mouseleave', hideTooltip);
+    infoIcon.removeEventListener('blur', hideTooltip);
+    infoIcon.removeEventListener('click', toggleTooltip);
+  }
+  document.removeEventListener('click', hideTooltipOnDocumentClick);
+
+  if (!infoIcon || !floatingTooltip) {
+    console.warn("Info icon or floating tooltip not found for event listeners setup.");
+    return;
+  }
+
+  // Add new listeners
+  infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, floatingTooltip));
+  infoIcon.addEventListener('focus', () => showTooltip(infoIcon, floatingTooltip));
+  infoIcon.addEventListener('mouseleave', () => hideTooltip(floatingTooltip));
+  infoIcon.addEventListener('blur', () => hideTooltip(floatingTooltip));
+  infoIcon.addEventListener('click', toggleTooltip); // New click handler for mobile/accessibility
+  document.addEventListener('click', hideTooltipOnDocumentClick); // Hide when clicking outside
+
+  // Define show/hide functions (can be outside or inside, but ensure they have access to infoIcon/floatingTooltip)
+  function showTooltip(infoIconElement, floatingTooltipElement) {
+    const totalCreditsSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.total_credits) || 0), 0);
+    const userTotalCreditsToComplete = userProfile ? (userProfile.total_credits_to_complete || 0) : 0;
+
+    let dynamicTooltipMessage = "Complete the table as all credits are not listed - total doesn't match"; // Default message
+    if (totalCreditsSum > userTotalCreditsToComplete) {
+      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are more than the required credits to complete (${userTotalCreditsToComplete}).`;
+    } else if (totalCreditsSum < userTotalCreditsToComplete) {
+      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are less than the required credits to complete (${userTotalCreditsToComplete}).`;
+    } else {
+      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
+    }
+
+    console.log('showTooltip: Dynamic Tooltip Message:', dynamicTooltipMessage);
+    floatingTooltipElement.textContent = dynamicTooltipMessage;
+    console.log('showTooltip: Floating Tooltip Text Content after assignment:', floatingTooltipElement.textContent);
+    console.log('showTooltip: Adding visible class to tooltip.');
+
+    // Get dimensions and position it
+    const rect = infoIconElement.getBoundingClientRect();
+
+    // Ensure it's displayed as block for offsetWidth/offsetHeight to work
+    floatingTooltipElement.style.display = 'block'; 
+    floatingTooltipElement.style.visibility = 'hidden'; // Hide temporarily for measurement
+
+    // Wait for a frame to ensure reflow after display block
+    requestAnimationFrame(() => {
+      const tooltipWidth = floatingTooltipElement.offsetWidth;
+      const tooltipHeight = floatingTooltipElement.offsetHeight;
+
+      floatingTooltipElement.style.left = (rect.left + rect.width / 2 - tooltipWidth / 2) + 'px';
+      floatingTooltipElement.style.top = (rect.top - tooltipHeight - 12) + 'px'; // 12px margin
+      floatingTooltipElement.classList.add('visible');
+      floatingTooltipElement.style.visibility = 'visible'; // Finally make visible
+    });
+  }
+
+  function hideTooltip() {
+    floatingTooltip.classList.remove('visible');
+    // After transition, set display to none to remove it from layout flow
+    setTimeout(() => {
+      if (!floatingTooltip.classList.contains('visible')) { // Only hide if it's truly not visible
+        floatingTooltip.style.display = 'none';
+        floatingTooltip.style.visibility = 'hidden';
+      }
+    }, 200); // Match transition duration
+  }
+
+  function toggleTooltip(e) {
+    if (floatingTooltip.classList.contains('visible')) {
+      hideTooltip();
+    } else {
+      showTooltip(infoIcon, floatingTooltip);
+    }
+    e.stopPropagation(); // Prevent document click from immediately closing
+  }
+
+  function hideTooltipOnDocumentClick(e) {
+    if (!infoIcon.contains(e.target) && !floatingTooltip.contains(e.target)) {
+      hideTooltip();
+    }
+  }
 }
