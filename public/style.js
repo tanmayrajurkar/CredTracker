@@ -684,4 +684,47 @@ function addMainTableListeners() {
       detailsRow.style.display = 'none'
     }
   })
+  // Delete row
+  document.querySelectorAll('.delete-row-btn').forEach(btn => {
+    btn.onclick = async function() { // Made function async
+      const type = btn.getAttribute('data-delete')
+      const id = btn.getAttribute('data-id')
+
+      if (confirm(`Are you sure you want to delete this ${type}?`)) {
+        if (type === 'category') {
+          // Mark for deletion instead of immediate removal from local array
+          changes.deletedCategories.push(id);
+          // Remove from local categories and associated baskets
+          categories = categories.filter(cat => cat.id !== id);
+          baskets = baskets.filter(basket => basket.category_id !== id);
+        } else if (type === 'basket') {
+          // Mark for deletion
+          changes.deletedBaskets.push(id);
+          // Remove from local baskets array
+          baskets = baskets.filter(basket => basket.id !== id);
+        }
+        renderMainTable(); // Re-render table after deletion
+        showToast(`Selected ${type} deleted!`, 'success');
+      }
+    }
+  })
+}
+
+function showToast(message, type) {
+  const toast = document.createElement('div');
+  toast.classList.add('toast', type);
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // Force reflow to trigger CSS transition
+  toast.offsetHeight;
+
+  toast.classList.add('show');
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => {
+      toast.remove();
+    }, { once: true });
+  }, 3000);
 }
