@@ -187,7 +187,7 @@ loginBtn.onclick = async () => {
                 authMessage.textContent = error.message;
             }
         } else {
-            await checkSession();
+            // No need to call checkSession() here, authStateChanged in init.js will handle it
         }
     } catch (err) {
         console.error('Login error:', err);
@@ -215,6 +215,7 @@ signupBtn.onclick = async () => {
             authMessage.textContent = 'Check your email for a confirmation link!';
             if (data && data.user) {
                 await createOrUpdateUserProfile(data.user.id, { onboarding_complete: false, name: '' });
+                // No need to call checkSession() here, authStateChanged in init.js will handle it
             }
         }
     } catch (err) {
@@ -1522,6 +1523,42 @@ document.addEventListener('visibilitychange', () => {
 // Handle browser back button
 window.addEventListener('popstate', function(event) {
     if (authContainer.style.display === 'flex') {
+        showLanding();
+    }
+});
+
+// Initial session check when script loads
+// checkSession();
+
+// Initial application load logic: Wait for DOM and then check session
+document.addEventListener('DOMContentLoaded', async () => {
+    // Ensure Supabase client is available before proceeding
+    // init.js runs before style.js, so window.supabaseClient should be set by DOMContentLoaded
+    if (window.supabaseClient) {
+        console.log("DOMContentLoaded: Checking initial Supabase session.");
+        try {
+            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            if (session) {
+                // Dispatch SIGNED_IN event if session exists
+                window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                    detail: { event: 'SIGNED_IN', session }
+                }));
+            } else {
+                // Dispatch SIGNED_OUT event if no session
+                window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                    detail: { event: 'SIGNED_OUT', session: null }
+                }));
+            }
+        } catch (error) {
+            console.error("DOMContentLoaded: Error getting session:", error);
+            // If there's an error, assume signed out for UI purposes
+            window.dispatchEvent(new CustomEvent('authStateChanged', { 
+                detail: { event: 'SIGNED_OUT', session: null }
+            }));
+        }
+    } else {
+        console.error("DOMContentLoaded: Supabase client not initialized!");
+        // Fallback to showing landing if Supabase client isn't ready
         showLanding();
     }
 });
