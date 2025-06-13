@@ -42,7 +42,7 @@ window.addEventListener('authStateChanged', async (event) => {
         }
     } else if (authEvent === 'SIGNED_OUT') {
         userProfile = null;
-        showAuthView();
+        showLanding(); // Show landing page instead of auth view
     }
 });
 
@@ -323,7 +323,12 @@ async function createOrUpdateUserProfile(userId, data) {
 // Event Listeners
 if (logoutBtn) {
   logoutBtn.onclick = async () => {
-    await window.supabaseClient.auth.signOut();
+    try {
+      await window.supabaseClient.auth.signOut();
+      showLanding(); // Show landing page after logout
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 }
 
