@@ -180,11 +180,22 @@ loginBtn.onclick = async () => {
             password: passwordInput.value
         });
         if (error) {
-            authMessage.textContent = error.message;
+            if (error.message.includes('CORS')) {
+                authMessage.textContent = 'Connection error: Please ensure you are accessing the site from the correct domain (credtracker.netlify.app) and try again. If the problem persists, please contact support.';
+                console.error('CORS error during login:', error);
+            } else {
+                authMessage.textContent = error.message;
+            }
+        } else {
+            await checkSession();
         }
     } catch (err) {
-        authMessage.textContent = 'An error occurred during login. Please try again.';
         console.error('Login error:', err);
+        if (err.message.includes('Failed to fetch') || err.message.includes('CORS')) {
+            authMessage.textContent = 'Unable to connect to the server. Please ensure you are accessing the site from the correct domain (credtracker.netlify.app) and try again. If the problem persists, please contact support.';
+        } else {
+            authMessage.textContent = 'An error occurred during login. Please try again.';
+        }
     } finally {
         loginBtn.disabled = signupBtn.disabled = false;
     }
