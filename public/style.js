@@ -574,6 +574,7 @@ function renderMainTable(initialOpenStates = null) {
         <th>Category</th>
         <th>Total Credits</th>
         <th>Earned Credits</th>
+        <th>Remaining Credits</th>
         <th>View</th>
         <th>Delete</th>
       </tr>
@@ -589,12 +590,16 @@ function renderMainTable(initialOpenStates = null) {
       .filter(b => b.category_id === cat.id)
       .reduce((sum, basket) => sum + (parseFloat(basket.earned_credits) || 0), 0);
 
+    // Calculate remaining credits for this category
+    const remainingCredits = (parseFloat(cat.total_credits) || 0) - categoryEarnedCredits;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><input class="editable-input" type="number" value="${cat.sl_no ?? ''}" data-type="category" data-id="${cat.id}" data-field="sl_no"></td>
       <td><input class="editable-input" type="text" value="${cat.category ?? ''}" data-type="category" data-id="${cat.id}" data-field="category"></td>
       <td><input class="editable-input" type="number" value="${cat.total_credits ?? ''}" data-type="category" data-id="${cat.id}" data-field="total_credits"></td>
       <td style="font-weight:600;">${categoryEarnedCredits}</td>
+      <td style="font-weight:600;">${remainingCredits}</td>
       <td><button class="view-btn" data-toggle="${cat.id}">${statesToUseForRendering.has(String(cat.id)) ? '-' : '+'}</button></td>
       <td><button class="delete-row-btn" data-delete="category" data-id="${cat.id}">Delete</button></td>
     `;
@@ -607,7 +612,7 @@ function renderMainTable(initialOpenStates = null) {
     console.log(`Category ID: ${cat.id}, Should be open: ${shouldBeOpen}`);
     detailsTr.style.display = shouldBeOpen ? '' : 'none';
     const detailsTd = document.createElement('td');
-    detailsTd.colSpan = 6;
+    detailsTd.colSpan = 7;
     detailsTd.innerHTML = renderDetailsTable(cat.id);
     detailsTr.appendChild(detailsTd);
     tbody.appendChild(detailsTr);
@@ -626,7 +631,7 @@ function renderMainTable(initialOpenStates = null) {
     <td class="total-credits-cell${isMismatch ? ' mismatch' : ''}">
       ${totalCreditsSum} ${isMismatch ? `<div class="info-icon" tabindex="0" id="total-tooltip-trigger">i</div>` : ''}
     </td>
-    <td colspan="2" style="font-weight:600;">To Complete: ${userTotalCreditsToComplete}</td>
+    <td colspan="5" style="font-weight:600;">To Complete: ${userTotalCreditsToComplete}</td>
   `;
 
   // Add earned credits row
@@ -634,7 +639,7 @@ function renderMainTable(initialOpenStates = null) {
   earnedTr.innerHTML = `
     <td colspan="2" style="font-weight:600;">Total Earned Credits</td>
     <td style="font-weight:600;">${totalEarnedSum}</td>
-    <td colspan="2" style="font-weight:600;">Remaining: ${userTotalCreditsToComplete - totalEarnedSum}</td>
+    <td colspan="5" style="font-weight:600;">Remaining: ${userTotalCreditsToComplete - totalEarnedSum}</td>
   `;
 
   tbody.appendChild(totalTr);
@@ -642,7 +647,7 @@ function renderMainTable(initialOpenStates = null) {
 
   // Add category button row
   const addCatTr = document.createElement('tr');
-  addCatTr.innerHTML = `<td colspan="6"><button class="add-row-btn" id="add-category-btn">+ Add Category</button></td>`;
+  addCatTr.innerHTML = `<td colspan="7"><button class="add-row-btn" id="add-category-btn">+ Add Category</button></td>`;
   tbody.appendChild(addCatTr);
 
   mainTableContainer.appendChild(table);
