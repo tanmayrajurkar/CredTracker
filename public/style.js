@@ -177,59 +177,60 @@ function setupGlobalTooltipListeners() {
   }
 }
 
-loginBtn.onclick = async () => {
-    loginBtn.disabled = signupBtn.disabled = true;
-    authMessage.textContent = '';
-    try {
-        const { error } = await window.supabaseClient.auth.signInWithPassword({
-            email: emailInput.value,
-            password: passwordInput.value
-        });
-        if (error) {
-            if (error.message.includes('CORS')) {
-                authMessage.textContent = 'Connection error: Please ensure you are accessing the site from the correct domain (credtracker.netlify.app) and try again. If the problem persists, please contact support.';
-                console.error('CORS error during login:', error);
-            } else {
-                authMessage.textContent = error.message;
-            }
-        } else {
-            await checkSession();
-        }
-    } catch (err) {
-        console.error('Login error:', err);
-        if (err.message.includes('Failed to fetch') || err.message.includes('CORS')) {
-            authMessage.textContent = 'Unable to connect to the server. Please ensure you are accessing the site from the correct domain (credtracker.netlify.app) and try again. If the problem persists, please contact support.';
-        } else {
-            authMessage.textContent = 'An error occurred during login. Please try again.';
-        }
-    } finally {
-        loginBtn.disabled = signupBtn.disabled = false;
-    }
-};
+// Handle Login form submission (now also handles implicit signup)
+if (authForm) {
+    authForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission
 
-signupBtn.onclick = async () => {
-    loginBtn.disabled = signupBtn.disabled = true;
-    authMessage.textContent = '';
-    try {
-        const { data, error } = await window.supabaseClient.auth.signUp({
-            email: emailInput.value,
-            password: passwordInput.value
-        });
-        if (error) {
-            authMessage.textContent = error.message;
-        } else {
-            authMessage.textContent = 'Check your email for a confirmation link!';
-            if (data && data.user) {
-                await createOrUpdateUserProfile(data.user.id, { onboarding_complete: false, name: '' });
+        loginBtn.disabled = true; // Only loginBtn exists now
+        authMessage.textContent = '';
+
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        try {
+            // Attempt to sign in first
+            const { error: signInError } = await window.supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (signInError) {
+                if (signInError.message.includes('Invalid login credentials')) {
+                    // User might not exist, try signing up
+                    console.log('Sign-in failed, attempting signup...');
+                    const { data: signUpData, error: signUpError } = await window.supabaseClient.auth.signUp({
+                        email: email,
+                        password: password
+                    });
+
+                    if (signUpError) {
+                        authMessage.textContent = signUpError.message;
+                        console.error('Signup error:', signUpError);
+                    } else {
+                        authMessage.textContent = 'Check your email for a confirmation link!';
+                        if (signUpData && signUpData.user) {
+                            await createOrUpdateUserProfile(signUpData.user.id, { onboarding_complete: false, name: '' });
+                        }
+                    }
+                } else if (signInError.message.includes('CORS')) {
+                    authMessage.textContent = 'Connection error: Please ensure you are accessing the site from the correct domain (credtracker.netlify.app) and try again. If the problem persists, please contact support.';
+                    console.error('CORS error during login:', signInError);
+                } else {
+                    authMessage.textContent = signInError.message;
+                }
+            } else {
+                // Successful sign-in
+                await checkSession();
             }
+        } catch (err) {
+            console.error('Authentication error:', err);
+            authMessage.textContent = 'An unexpected error occurred. Please try again.';
+        } finally {
+            loginBtn.disabled = false;
         }
-    } catch (err) {
-        authMessage.textContent = 'An error occurred during signup. Please try again.';
-        console.error('Signup error:', err);
-    } finally {
-        loginBtn.disabled = signupBtn.disabled = false;
-    }
-};
+    });
+}
 
 // View Management Functions
 function showAuthView() {
