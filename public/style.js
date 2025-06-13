@@ -749,18 +749,21 @@ function addMainTableListeners(scope = document) {
       }
 
       if (type === 'category') {
-        const categoryToUpdate = categories.find(c => c.id === id); // c.id is now string, id is string
+        const categoryToUpdate = categories.find(c => c.id === id);
         if (categoryToUpdate) {
             categoryToUpdate[field] = value;
         }
         if (!changes.categories[id]) changes.categories[id] = {};
         changes.categories[id][field] = value;
       } else if (type === 'basket') {
-        const basketToUpdate = baskets.find(b => b.id === id); // b.id is now string, id is string
+        const basketToUpdate = baskets.find(b => b.id === id);
         if (basketToUpdate) {
             basketToUpdate[field] = value;
+            // Always update remaining_credits when min_credits or earned_credits changes
             if (field === 'min_credits' || field === 'earned_credits') {
-                basketToUpdate.remaining_credits = (parseFloat(basketToUpdate.min_credits) || 0) - (parseFloat(basketToUpdate.earned_credits) || 0);
+                const minCredits = parseFloat(basketToUpdate.min_credits) || 0;
+                const earnedCredits = parseFloat(basketToUpdate.earned_credits) || 0;
+                basketToUpdate.remaining_credits = minCredits - earnedCredits;
                 if (!changes.baskets[id]) changes.baskets[id] = {};
                 changes.baskets[id].remaining_credits = basketToUpdate.remaining_credits;
             }
@@ -993,7 +996,17 @@ saveBtn.onclick = async function() {
     // Update baskets
     for (const id in changes.baskets) {
       if (!id.toString().startsWith('new-') && !changes.deletedBaskets.includes(id)) {
-        const { error } = await window.supabaseClient.from('credit_baskets').update(changes.baskets[id]).eq('id', id);
+        const updateData = { ...changes.baskets[id] };
+        // Only include fields that exist in the table
+        const validFields = ['basket_name', 'min_credits', 'earned_credits', 'remaining_credits', 'category_id', 'user_id'];
+        Object.keys(updateData).forEach(key => {
+          if (!validFields.includes(key)) {
+            delete updateData[key];
+          }
+        });
+        // Ensure user_id is set
+        updateData.user_id = window.currentUser ? window.currentUser.id : null;
+        const { error } = await window.supabaseClient.from('credit_baskets').update(updateData).eq('id', id);
         if (error) throw new Error(`Failed to update basket ${id}: ${error.message}`);
       }
     }
@@ -1030,6 +1043,13 @@ saveBtn.onclick = async function() {
         category_id: bask.category_id // Ensure category_id is included
       };
       delete insertData.id; // Remove temporary client-side ID
+      // Only include fields that exist in the table
+      const validFields = ['basket_name', 'min_credits', 'earned_credits', 'remaining_credits', 'category_id', 'user_id'];
+      Object.keys(insertData).forEach(key => {
+        if (!validFields.includes(key)) {
+          delete insertData[key];
+        }
+      });
       const { error } = await window.supabaseClient.from('credit_baskets').insert([insertData]);
       if (error) throw new Error(`Failed to insert new basket: ${error.message}`);
     }
@@ -1091,7 +1111,7 @@ saveBtn.onclick = async function() {
     showToast('Changes saved successfully!', 'success');
   } catch (error) {
     console.error('Save error:', error);
-    alert(`Failed to save changes: ${error.message}`);
+    showToast(`Failed to save changes: ${error.message}`, 'error');
     saveBtn.textContent = 'Save Failed - Try Again';
   } finally {
     saveBtn.disabled = false;
