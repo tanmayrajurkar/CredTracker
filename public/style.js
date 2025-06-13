@@ -5,6 +5,9 @@ let changes = { categories: {}, baskets: {}, newCategories: [], newBaskets: [], 
 let userProfile = null;
 let openDetailRows = new Set(); // Store IDs of categories with open detail rows
 
+// Landing UI elements
+const landingContainer = document.getElementById('landing-container');
+
 // Function to save current input values within a given scope
 function saveInputStates(scope = document) {
   const inputStates = new Map(); // Using a Map for compound keys
@@ -42,7 +45,7 @@ window.addEventListener('authStateChanged', async (event) => {
         }
     } else if (authEvent === 'SIGNED_OUT') {
         userProfile = null;
-        showLanding(); // Show landing page instead of auth view
+        showLandingView(); // Show landing page instead of auth view
     }
 });
 
@@ -227,6 +230,7 @@ signupBtn.onclick = async () => {
 
 // View Management Functions
 function showAuthView() {
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'flex';
   onboardingContainer.style.display = 'none';
   appContainer.style.display = 'none';
@@ -235,6 +239,7 @@ function showAuthView() {
 }
 
 function showOnboardingView() {
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'none';
   onboardingContainer.style.display = 'flex';
   appContainer.style.display = 'none';
@@ -244,6 +249,7 @@ function showOnboardingView() {
 }
 
 function showAppView() {
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'none';
   onboardingContainer.style.display = 'none';
   appContainer.style.display = 'block';
@@ -325,7 +331,7 @@ if (logoutBtn) {
   logoutBtn.onclick = async () => {
     try {
       await window.supabaseClient.auth.signOut();
-      showLanding(); // Show landing page after logout
+      showLandingView(); // Show landing page after logout
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -1322,19 +1328,13 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
 // Function to show auth page and hide landing page
 function showAuth() {
     window.history.pushState({ page: 'auth' }, '', '#auth');
-    authContainer.style.display = 'flex';
-    onboardingContainer.style.display = 'none';
-    appContainer.style.display = 'none';
-    document.getElementById('landing-container').style.display = 'none';
+    showAuthView();
 }
 
 // Function to show landing page and hide auth page
 function showLanding() {
     window.history.pushState({ page: 'landing' }, '', '#');
-    document.getElementById('landing-container').style.display = 'block';
-    authContainer.style.display = 'none';
-    onboardingContainer.style.display = 'none';
-    appContainer.style.display = 'none';
+    showLandingView();
 }
 
 // Add smooth scrolling for navigation links
@@ -1522,6 +1522,34 @@ document.addEventListener('visibilitychange', () => {
 // Handle browser back button
 window.addEventListener('popstate', function(event) {
     if (authContainer.style.display === 'flex') {
-        showLanding();
+        showLandingView();
     }
 });
+
+// Initial check on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (session) {
+    window.currentUser = session.user;
+    await loadUserProfile();
+    if (userProfile && userProfile.onboarding_complete) {
+      showAppView();
+    } else {
+      showOnboardingView();
+    }
+  } else {
+    window.currentUser = null;
+    userProfile = null;
+    showLandingView();
+  }
+});
+
+// New function to show the landing view
+function showLandingView() {
+  landingContainer.style.display = 'block'; // Or 'flex' or appropriate for landing
+  authContainer.style.display = 'none';
+  onboardingContainer.style.display = 'none';
+  appContainer.style.display = 'none';
+  profilePopover.style.display = 'none';
+  editProfileView.style.display = 'none';
+}

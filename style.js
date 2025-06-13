@@ -13,6 +13,9 @@ let userProfile = null;
 const mainTableContainer = document.getElementById('main-table-container')
 const saveBtn = document.getElementById('save-btn')
 
+// Landing UI elements
+const landingContainer = document.getElementById('landing-container');
+
 // Auth UI elements
 const authContainer = document.getElementById('auth-container');
 const appContainer = document.getElementById('app-container');
@@ -170,12 +173,13 @@ async function checkSession() {
   } else {
     window.currentUser = null;
     userProfile = null;
-    showAuthView();
+    showLandingView();
   }
 }
 
 // View Management Functions
 function showAuthView() {
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'flex';
   onboardingContainer.style.display = 'none';
   appContainer.style.display = 'none';
@@ -184,6 +188,7 @@ function showAuthView() {
 }
 
 function showOnboardingView() {
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'none';
   onboardingContainer.style.display = 'flex';
   appContainer.style.display = 'none';
@@ -194,6 +199,7 @@ function showOnboardingView() {
 
 function showAppView() {
   console.log("showAppView called.");
+  landingContainer.style.display = 'none';
   authContainer.style.display = 'none';
   onboardingContainer.style.display = 'none';
   appContainer.style.display = 'block';
@@ -852,4 +858,25 @@ document.addEventListener('click', function(e) {
       icon.classList.remove('active');
     }
   });
+});
+
+// Add a new function to show the landing view
+function showLandingView() {
+  landingContainer.style.display = 'block'; // Or 'flex' or appropriate for landing
+  authContainer.style.display = 'none';
+  onboardingContainer.style.display = 'none';
+  appContainer.style.display = 'none';
+  profilePopover.style.display = 'none';
+  editProfileView.style.display = 'none';
+}
+
+// Initial check on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  await checkSession();
+  // This function will handle showing the correct view based on session status
+});
+
+window.addEventListener('authStateChanged', async (event) => {
+  console.log('Auth state changed:', event.detail.event);
+  await checkSession();
 });
