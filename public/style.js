@@ -1167,6 +1167,7 @@ document.querySelector('#main-content-view').insertAdjacentHTML('beforeend', `
           <li>Each category represents a type of credit requirement (e.g., University Core, Program Elective)</li>
           <li>Baskets within each category help you break down specific requirements</li>
           <li>Track your earned credits and see your progress towards completion</li>
+          <li>To find your credit distribution, visit vtop and navigate as follows: vtop -> academics -> my credit distribution</li>
         </ul>
       </section>
 
@@ -1210,11 +1211,24 @@ document.querySelector('#main-content-view').insertAdjacentHTML('beforeend', `
           <li>You can edit any field by clicking on it</li>
         </ul>
       </section>
+
+      <section>
+        <h3>Example Credit Distribution</h3>
+        <div class="example-images">
+          <img src="imgs/Screenshot 2025-06-13 at 21.03.23.png" alt="Credit Distribution Example 1" class="zoomable-image" style="width: 100%; margin-bottom: 10px;">
+          <img src="imgs/Screenshot 2025-06-13 at 21.03.39.png" alt="Credit Distribution Example 2" class="zoomable-image" style="width: 100%;">
+        </div>
+      </section>
     </div>
+  </div>
+
+  <div id="image-modal" class="image-modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modal-image">
   </div>
 `);
 
-// Add floating tooltip container to the body to ensure it's always on top
+// Add floating tooltip container to the body
 document.body.insertAdjacentHTML('beforeend', `
   <div id="floating-tooltip" class="floating-tooltip"></div>
 `);
@@ -1237,99 +1251,39 @@ document.addEventListener('click', function(event) {
   }
 });
 
-// Centralize tooltip functionality to avoid duplicates and ensure it's set up correctly.
-function setupGlobalTooltipListeners() {
-  // Query elements inside this function to ensure they are current after DOM updates
-  const infoIcon = document.getElementById('total-tooltip-trigger');
-  const floatingTooltip = document.getElementById('floating-tooltip');
-
-  // Remove previous listeners if they exist to prevent duplicates
-  if (infoIcon) {
-    infoIcon.removeEventListener('mouseenter', showTooltip);
-    infoIcon.removeEventListener('focus', showTooltip);
-    infoIcon.removeEventListener('mouseleave', hideTooltip);
-    infoIcon.removeEventListener('blur', hideTooltip);
-    infoIcon.removeEventListener('click', toggleTooltip);
-  }
-  document.removeEventListener('click', hideTooltipOnDocumentClick);
-
-  if (!infoIcon || !floatingTooltip) {
-    console.warn("Info icon or floating tooltip not found for event listeners setup.");
-    return;
-  }
-
-  // Add new listeners
-  infoIcon.addEventListener('mouseenter', () => showTooltip(infoIcon, floatingTooltip));
-  infoIcon.addEventListener('focus', () => showTooltip(infoIcon, floatingTooltip));
-  infoIcon.addEventListener('mouseleave', () => hideTooltip(floatingTooltip));
-  infoIcon.addEventListener('blur', () => hideTooltip(floatingTooltip));
-  infoIcon.addEventListener('click', toggleTooltip); // New click handler for mobile/accessibility
-  document.addEventListener('click', hideTooltipOnDocumentClick); // Hide when clicking outside
-
-  // Define show/hide functions (can be outside or inside, but ensure they have access to infoIcon/floatingTooltip)
-  function showTooltip(infoIconElement, floatingTooltipElement) {
-    const totalCreditsSum = categories.reduce((sum, cat) => sum + (parseFloat(cat.total_credits) || 0), 0);
-    const userTotalCreditsToComplete = userProfile ? (userProfile.total_credits_to_complete || 0) : 0;
-
-    let dynamicTooltipMessage = "Complete the table as all credits are not listed - total doesn't match"; // Default message
-    if (totalCreditsSum > userTotalCreditsToComplete) {
-      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are more than the required credits to complete (${userTotalCreditsToComplete}).`;
-    } else if (totalCreditsSum < userTotalCreditsToComplete) {
-      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) are less than the required credits to complete (${userTotalCreditsToComplete}).`;
-    } else {
-      dynamicTooltipMessage = `Your total credits (${totalCreditsSum}) match the required credits to complete (${userTotalCreditsToComplete}).`;
+// Add image modal functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('image-modal');
+  const modalImg = document.getElementById('modal-image');
+  const closeModal = document.querySelector('.close-modal');
+  
+  // Add click handlers to all zoomable images
+  document.querySelectorAll('.zoomable-image').forEach(img => {
+    img.onclick = function() {
+      modal.style.display = "flex";
+      modalImg.src = this.src;
     }
+  });
 
-    console.log('showTooltip: Dynamic Tooltip Message:', dynamicTooltipMessage);
-    floatingTooltipElement.textContent = dynamicTooltipMessage;
-    console.log('showTooltip: Floating Tooltip Text Content after assignment:', floatingTooltipElement.textContent);
-    console.log('showTooltip: Adding visible class to tooltip.');
-
-    // Get dimensions and position it
-    const rect = infoIconElement.getBoundingClientRect();
-
-    // Ensure it's displayed as block for offsetWidth/offsetHeight to work
-    floatingTooltipElement.style.display = 'block'; 
-    floatingTooltipElement.style.visibility = 'hidden'; // Hide temporarily for measurement
-
-    // Wait for a frame to ensure reflow after display block
-    requestAnimationFrame(() => {
-      const tooltipWidth = floatingTooltipElement.offsetWidth;
-      const tooltipHeight = floatingTooltipElement.offsetHeight;
-
-      floatingTooltipElement.style.left = (rect.left + rect.width / 2 - tooltipWidth / 2) + 'px';
-      floatingTooltipElement.style.top = (rect.top - tooltipHeight - 12) + 'px'; // 12px margin
-      floatingTooltipElement.classList.add('visible');
-      floatingTooltipElement.style.visibility = 'visible'; // Finally make visible
-    });
+  // Close modal when clicking the close button
+  closeModal.onclick = function() {
+    modal.style.display = "none";
   }
 
-  function hideTooltip() {
-    floatingTooltip.classList.remove('visible');
-    // After transition, set display to none to remove it from layout flow
-    setTimeout(() => {
-      if (!floatingTooltip.classList.contains('visible')) { // Only hide if it's truly not visible
-        floatingTooltip.style.display = 'none';
-        floatingTooltip.style.visibility = 'hidden';
-      }
-    }, 200); // Match transition duration
-  }
-
-  function toggleTooltip(e) {
-    if (floatingTooltip.classList.contains('visible')) {
-      hideTooltip();
-    } else {
-      showTooltip(infoIcon, floatingTooltip);
-    }
-    e.stopPropagation(); // Prevent document click from immediately closing
-  }
-
-  function hideTooltipOnDocumentClick(e) {
-    if (!infoIcon.contains(e.target) && !floatingTooltip.contains(e.target)) {
-      hideTooltip();
+  // Close modal when clicking outside the image
+  modal.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
     }
   }
-}
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape" && modal.style.display === "flex") {
+      modal.style.display = "none";
+    }
+  });
+});
 
 // Auth tab switching
 document.querySelectorAll('.auth-tab').forEach(tab => {
