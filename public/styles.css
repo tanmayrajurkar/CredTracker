@@ -1729,10 +1729,3 @@ body {
         grid-template-columns: 1fr;
     }
 }
-
-.auth-container,
-.onboarding-container,
-.app-container,
-#landing-container {
-    display: none !important;
-}
