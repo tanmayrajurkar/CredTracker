@@ -12,7 +12,19 @@ try {
         auth: {
             autoRefreshToken: true,
             persistSession: true,
-            detectSessionInUrl: true
+            detectSessionInUrl: true,
+            storage: {
+                getItem: (key) => {
+                    const value = localStorage.getItem(key);
+                    return value ? JSON.parse(value) : null;
+                },
+                setItem: (key, value) => {
+                    localStorage.setItem(key, JSON.stringify(value));
+                },
+                removeItem: (key) => {
+                    localStorage.removeItem(key);
+                }
+            }
         },
         global: {
             headers: {
@@ -26,14 +38,18 @@ try {
     
     // Set up auth state change listener
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state changed:', event, session);
+        
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
             window.currentUser = session.user;
-            // Dispatch a custom event that style.js can listen to
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
                 detail: { event, session }
             }));
         } else if (event === 'SIGNED_OUT') {
+            // Clear all auth-related data
             window.currentUser = null;
+            localStorage.removeItem('supabase.auth.token');
+            localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token');
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
                 detail: { event, session: null }
             }));
@@ -47,6 +63,11 @@ try {
             window.dispatchEvent(new CustomEvent('authStateChanged', { 
                 detail: { event: 'SIGNED_IN', session }
             }));
+        } else {
+            // Ensure we're logged out if no session
+            window.currentUser = null;
+            localStorage.removeItem('supabase.auth.token');
+            localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token');
         }
     }).catch(error => {
         console.error('Error checking initial session:', error);

@@ -330,8 +330,23 @@ async function createOrUpdateUserProfile(userId, data) {
 if (logoutBtn) {
   logoutBtn.onclick = async () => {
     try {
+      // Clear local state first
+      window.currentUser = null;
+      userProfile = null;
+      
+      // Clear all auth-related data from localStorage
+      const supabaseUrl = window.config.SUPABASE_URL;
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-' + supabaseUrl.split('//')[1].split('.')[0] + '-auth-token');
+      
+      // Sign out from Supabase
       await window.supabaseClient.auth.signOut();
-      showLandingView(); // Show landing page after logout
+      
+      // Force show landing view immediately
+      showLandingView();
+      
+      // Force reload the page to clear any remaining state
+      window.location.reload();
     } catch (error) {
       console.error('Error during logout:', error);
     }
@@ -1184,9 +1199,6 @@ document.body.insertAdjacentHTML('beforeend', `
   <div id="floating-tooltip" class="floating-tooltip"></div>
 `);
 
-// Add info sidebar styles
-// REMOVED INLINE STYLE BLOCK TO AVOID CSS CONFLICTS. ALL STYLES SHOULD BE IN styles.css
-
 // Add info sidebar functionality
 document.getElementById('info-btn').onclick = function() {
   document.getElementById('info-sidebar').classList.add('visible');
@@ -1510,9 +1522,6 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Initialize 3D model when the page loads
-window.addEventListener('load', init3DModel);
-
 // Pause animation when tab is not visible
 document.addEventListener('visibilitychange', () => {
     isAnimating = !document.hidden;
@@ -1552,4 +1561,40 @@ function showLandingView() {
   appContainer.style.display = 'none';
   profilePopover.style.display = 'none';
   editProfileView.style.display = 'none';
+  
+  // Initialize 3D model after the landing container is shown
+  requestAnimationFrame(() => {
+    init3DModel();
+  });
+}
+
+async function checkSession() {
+  console.log("checkSession called.");
+  try {
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    
+    // If no session, ensure we're in landing view
+    if (!session) {
+      window.currentUser = null;
+      userProfile = null;
+      showLandingView();
+      return;
+    }
+    
+    // If we have a session, update user and check profile
+    window.currentUser = session.user;
+    await loadUserProfile();
+
+    if (userProfile && userProfile.onboarding_complete) {
+      showAppView();
+    } else {
+      showOnboardingView();
+    }
+  } catch (error) {
+    console.error('Error checking session:', error);
+    // On error, default to landing view
+    window.currentUser = null;
+    userProfile = null;
+    showLandingView();
+  }
 }
