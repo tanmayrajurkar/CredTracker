@@ -1,3 +1,6 @@
+let scene, camera, renderer, particleSystem, controls;
+let isAnimating = true;
+
 // Remove duplicate Supabase initialization
 let categories = []
 let baskets = []
@@ -877,40 +880,46 @@ function addMainTableListeners(scope = document) {
       if (confirm(`Are you sure you want to delete this ${type}?`)) {
         try {
           if (type === 'category') {
-            // First delete all baskets associated with this category
-            const { error: basketError } = await window.supabaseClient
-              .from('credit_baskets')
-              .delete()
-              .eq('category_id', id)
-              .eq('user_id', window.currentUser.id);
-            
-            if (basketError) {
-              throw new Error(`Failed to delete baskets for category ${id}: ${basketError.message}`);
-            }
+            // Only attempt database deletion if the ID is not a temporary new ID
+            if (!id.startsWith('new-')) {
+              // First delete all baskets associated with this category
+              const { error: basketError } = await window.supabaseClient
+                .from('credit_baskets')
+                .delete()
+                .eq('category_id', parseInt(id)) // Convert to integer for database
+                .eq('user_id', window.currentUser.id);
+              
+              if (basketError) {
+                throw new Error(`Failed to delete baskets for category ${id}: ${basketError.message}`);
+              }
 
-            // Then delete the category
-            const { error: categoryError } = await window.supabaseClient
-              .from('credit_categories')
-              .delete()
-              .eq('id', id)
-              .eq('user_id', window.currentUser.id);
+              // Then delete the category
+              const { error: categoryError } = await window.supabaseClient
+                .from('credit_categories')
+                .delete()
+                .eq('id', parseInt(id)) // Convert to integer for database
+                .eq('user_id', window.currentUser.id);
 
-            if (categoryError) {
-              throw new Error(`Failed to delete category ${id}: ${categoryError.message}`);
+              if (categoryError) {
+                throw new Error(`Failed to delete category ${id}: ${categoryError.message}`);
+              }
             }
 
             // Update frontend state
             categories = categories.filter(cat => cat.id !== id);
             baskets = baskets.filter(basket => basket.category_id !== id);
           } else if (type === 'basket') {
-            const { error } = await window.supabaseClient
-              .from('credit_baskets')
-              .delete()
-              .eq('id', id)
-              .eq('user_id', window.currentUser.id);
+            // Only attempt database deletion if the ID is not a temporary new ID
+            if (!id.startsWith('new-')) {
+              const { error } = await window.supabaseClient
+                .from('credit_baskets')
+                .delete()
+                .eq('id', parseInt(id)) // Convert to integer for database
+                .eq('user_id', window.currentUser.id);
 
-            if (error) {
-              throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+              if (error) {
+                throw new Error(`Failed to delete basket ${id}: ${error.message}`);
+              }
             }
 
             // Update frontend state
@@ -1024,6 +1033,11 @@ saveBtn.onclick = async function() {
       });
       // Ensure user_id is set
       insertData.user_id = window.currentUser ? window.currentUser.id : null;
+      
+      // Convert empty strings to null for numeric fields
+      if (insertData.sl_no === '') insertData.sl_no = null;
+      if (insertData.total_credits === '') insertData.total_credits = null;
+      
       const { data, error } = await window.supabaseClient.from('credit_categories').insert([insertData]).select();
       if (error) throw new Error(`Failed to insert new category: ${error.message}`);
       
@@ -1050,6 +1064,12 @@ saveBtn.onclick = async function() {
           delete insertData[key];
         }
       });
+      
+      // Convert empty strings to null for numeric fields
+      if (insertData.min_credits === '') insertData.min_credits = null;
+      if (insertData.earned_credits === '') insertData.earned_credits = null;
+      if (insertData.remaining_credits === '') insertData.remaining_credits = null;
+      
       const { error } = await window.supabaseClient.from('credit_baskets').insert([insertData]);
       if (error) throw new Error(`Failed to insert new basket: ${error.message}`);
     }
@@ -1341,10 +1361,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 document.getElementById('current-year').textContent = new Date().getFullYear();
 
 // 3D Model Animation
-let scene, camera, renderer, controls;
-let particles, particleSystem;
-let isAnimating = true;
-
 function init3DModel() {
     // Create scene
     scene = new THREE.Scene();
@@ -1421,6 +1437,12 @@ function init3DModel() {
     const pointLight2 = new THREE.PointLight(0x2176bd, 1);
     pointLight2.position.set(-10, -10, -10);
     scene.add(pointLight2);
+
+    // Initialize OrbitControls
+    controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = false;
 
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);

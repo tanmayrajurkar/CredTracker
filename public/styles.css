@@ -8,9 +8,6 @@
 body {
     background-color: #f5f5f5;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding: 10px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -19,10 +16,8 @@ body {
 .container {
     padding: 20px;
     width: 100%;
-    max-width: 1200px;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .card {
@@ -719,8 +714,6 @@ body {
 
 .app-container {
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
     padding: 10px;
 }
 
@@ -816,7 +809,8 @@ body {
     }
 
     .auth-container, .onboarding-container, .app-container {
-        padding: 10px;
+        max-width: 98%;
+        margin: 10px auto;
     }
 
     .auth-form, .onboarding-step {
