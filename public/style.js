@@ -1498,25 +1498,31 @@ function animate() {
     requestAnimationFrame(animate);
 
     // Update controls
-    controls.update();
+    if (typeof controls !== 'undefined' && controls) controls.update();
 
     // Rotate main mesh
-    const mainMesh = scene.children.find(child => child instanceof THREE.Mesh);
-    if (mainMesh) {
-        mainMesh.rotation.x += 0.005;
-        mainMesh.rotation.y += 0.005;
+    if (typeof scene !== 'undefined' && scene && scene.children) {
+        const mainMesh = scene.children.find(child => child instanceof THREE.Mesh);
+        if (mainMesh) {
+            mainMesh.rotation.x += 0.005;
+            mainMesh.rotation.y += 0.005;
+        }
     }
 
     // Animate particles
-    const positions = particleSystem.geometry.attributes.position.array;
-    const time = Date.now() * 0.001;
-    for (let i = 0; i < positions.length; i += 3) {
-        positions[i] += Math.sin(time + positions[i]) * 0.01;
-        positions[i + 1] += Math.cos(time + positions[i + 1]) * 0.01;
+    if (typeof particleSystem !== 'undefined' && particleSystem && particleSystem.geometry && particleSystem.geometry.attributes && particleSystem.geometry.attributes.position) {
+        const positions = particleSystem.geometry.attributes.position.array;
+        const time = Date.now() * 0.001;
+        for (let i = 0; i < positions.length; i += 3) {
+            positions[i] += Math.sin(time + positions[i]) * 0.01;
+            positions[i + 1] += Math.cos(time + positions[i + 1]) * 0.01;
+        }
+        particleSystem.geometry.attributes.position.needsUpdate = true;
     }
-    particleSystem.geometry.attributes.position.needsUpdate = true;
 
-    renderer.render(scene, camera);
+    if (typeof renderer !== 'undefined' && renderer && typeof camera !== 'undefined' && camera && typeof scene !== 'undefined' && scene) {
+        renderer.render(scene, camera);
+    }
 }
 
 // Pause animation when tab is not visible
