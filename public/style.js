@@ -1234,6 +1234,16 @@ document.querySelector('#main-content-view').insertAdjacentHTML('beforeend', `
       </section>
 
       <section>
+        <h3>New & Advanced Features</h3>
+        <ul>
+          <li  ><b>Sticky Notes:</b> Add, move, and manage digital sticky notes anywhere on your screen. Use the dropdown next to "+ Sticky Note" to add or view all your notes. Notes are saved to your account and can be hidden or restored.</li>
+          <li  ><b>Curriculum & Roadmaps Dropdown:</b> Access your program's curriculum and roadmap PDFs directly from the header using a modern dropdown menu. Select your course, then choose Roadmap or Curriculum to view the relevant document instantly.</li>
+          <li ><b>Info Sidebar:</b> Click the "?" icon in the header to open a sidebar with detailed instructions, tips, and example screenshots for using CredTracker effectively.</li>
+          <li ><b>Profile Popover:</b> Click your profile icon in the header to quickly view or edit your name, email, and credit requirements, or to change your password.</li>
+        </ul>
+      </section>
+
+      <section>
         <h3>Example Credit Distribution</h3>
         <div class="example-images">
           <img src="imgs/Screenshot 2025-06-13 at 21.03.23.png" alt="Credit Distribution Example 1" class="zoomable-image" style="width: 100%; margin-bottom: 10px;">
