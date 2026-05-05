@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 
 // Read the config file
 const configPath = path.join(__dirname, 'public', 'config.js');
