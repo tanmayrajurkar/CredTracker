@@ -4,9 +4,9 @@
   "description": "Credits Distribution App",
   "main": "index.html",
   "scripts": {
-    "start": "serve public",
+    "start": "npm run build && serve public",
     "build": "node build.js",
-    "dev": "serve public"
+    "dev": "npm run build && serve public"
   },
   "dependencies": {
     "dotenv": "^16.0.3",

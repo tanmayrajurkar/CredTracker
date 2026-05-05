@@ -2,4 +2,7 @@
 .env
 
 # Node.js dependencies
-node_modules/ 
+node_modules/
+
+# Generated from config.template.js + SUPABASE_* (never commit secrets)
+public/config.js 

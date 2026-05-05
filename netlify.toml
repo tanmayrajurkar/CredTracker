@@ -5,6 +5,8 @@
 [build.environment]
   NODE_VERSION = "18"
   NODE_ENV = "production"
+  # Build injects env into this file; omit so scan does not match SUPABASE_* site secrets
+  SECRETS_SCAN_OMIT_PATHS = "public/config.js"
 
 [context.production.environment]
   NODE_ENV = "production"
